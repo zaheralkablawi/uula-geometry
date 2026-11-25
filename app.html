@@ -285,7 +285,7 @@ const T={
   kCin:['الدائرة الداخلية لمثلث','Incircle of a triangle'], hcin:['انقر رؤوس المثلث الثلاثة: تُرسم دائرته الداخلية ومركزها.','Click the three vertices: its incircle and center are drawn.'],
   kCen:['مركز الدائرة','Circle center'], hcen:['انقر دائرة لإضافة مركزها كنقطة (سحب المركز يحرك الدائرة).','Click a circle to add its center as a point (dragging it moves the circle).'],
   kEq:['وتر مساوٍ لوتر','Equal chord'], heq:['انقر وترًا ثم نقطة على الدائرة نفسها: يُرسم منها وتر مساوٍ له يبقى مساويًا عند السحب.','Click a chord, then a point on the same circle: an equal chord is drawn from it and stays equal when dragging.'], kEqNeed:['الوتر والنقطة يجب أن يكونا على الدائرة نفسها.','The chord and the point must be on the same circle.'],
-  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق (بالدوائر وبالزوايا 90° و180°)','Snapping (to circles and to 90° / 180° angles)'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
+  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق (بالدوائر، وبالزوايا 90° و180° مع إشارة زرقاء)','Snapping (to circles and to 90° / 180° angles)'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
   recent:['الأخيرة','Recent'], favs:['المفضلة','Favorites'], favT:['حفظ الشكل الحالي في المفضلة (أو إزالته)','Save the current figure to favorites (or remove it)'], favAdd:['حُفظ في المفضلة','Saved to favorites'], favDel:['أُزيل من المفضلة','Removed from favorites'],
   lockLen:['تثبيت الطول (الطول المكتوب يضبط الرسم)','Fix the length (a typed length sets the drawing)'], lockAng:['تثبيت القياس (القياس المكتوب يضبط الرسم)','Fix the measure (a typed measure sets the drawing)'], pinPt:['تثبيت النقطة','Pin the point'], lockNo:['لا يمكن التثبيت: طرفا العنصر مقيدان بعلاقة أخرى.','Cannot fix: both ends already have another relation.'], kPar:['مستقيم موازٍ','Parallel line'], hpar:['انقر قطعة ثم نقطة: يُرسم منها مستقيم موازٍ (ومن نقطة على الدائرة وتر موازٍ).','Click a segment, then a point: a parallel line is drawn from it (a parallel chord from a point on the circle).'],
   kArc:['تمييز قوس','Highlight an arc'], arcW:['القوس','Arc'], arcLab:['قياس القوس أو تعبير (مثل 80° أو 2x+1)','Arc measure or expression (e.g. 80° or 2x+1)'], arcBig:['القوس الأكبر','Major arc'], arcTicks:['علامات تساوي الأقواس','Equal-arc marks'], arcHl:['تلوين القوس (أطفئه لتبقى العلامات فقط)','Highlight the arc (turn off to keep only the marks)'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر. ثم انقر القوس لكتابة قياسه أو وضع علامات التساوي عليه.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
@@ -744,6 +744,7 @@ function draw(){
   const hs=[...h.matchAll(/data-h="sz"[^>]*cx="([\d.-]+)" cy="([\d.-]+)"/g)].map(m=>[+m[1],+m[2]]);
   REG.forEach(r=>{ if(own.has(r.key)||hs.some(q=>len(sub(q,r.p))<4)) return; h+=`<circle class="hv hp" data-h="pt" data-i="${esc(r.key)}" cx="${f2(r.p[0])}" cy="${f2(r.p[1])}" r="4.5"/>`; });
   if(S.empty) h+=`<text x="160" y="125" text-anchor="middle" dominant-baseline="central" font-family="UULA Sans" font-size="13" fill="#9aa3b0">${esc(L('emptyHint'))}</text>`;
+  h+=snapFxSVG();
   if(ZOOM.k!==1) h+=`<g class="zchip" data-z="reset"><rect x="${f2(VB.x+VB.w-44/ZOOM.k)}" y="${f2(VB.y+4/ZOOM.k)}" width="${f2(40/ZOOM.k)}" height="${f2(17/ZOOM.k)}" rx="${f2(8/ZOOM.k)}"/><text x="${f2(VB.x+VB.w-24/ZOOM.k)}" y="${f2(VB.y+12.5/ZOOM.k)}" font-size="${f2(10/ZOOM.k)}" text-anchor="middle" dominant-baseline="central">${Math.round(ZOOM.k*100)}%</text></g>`;
   $('fig').innerHTML=h+'</g>';
 }
@@ -885,20 +886,31 @@ function circSync(G,ci){ solve(G,ci==null?null:['c'+ci]); }
 function circRepin(G){ Object.entries(G.onc||{}).forEach(([k,[ci,a]])=>{ const o=(G.circles||[])[ci]; if(o&&G.pts[+k]) G.onc[k][1]=ang(sub(G.pts[+k],o.c)); }); }
 let SNAP=true; try{ SNAP=localStorage.getItem('uula-geometry-snap')!=='0'; }catch(e){}
 // التقاط الزوايا عند السحب: إذا قاربت الزاوية بين قطعتين 180° أو 90° (بفارق 1.5° أو أقل) تصبح كذلك تمامًا
-const SNAP_DEG=1.5;
-function angSnap(G,i,p){ if(!SNAP) return p; const P=G.pts, nb=freeNb(G,i); let best=null;
-  const consider=(q,err)=>{ if(err<=SNAP_DEG&&(!best||err<best.err)) best={q,err}; };
+const SNAP_DEG=2;
+let SNAPFX=null;   // إشارة مرئية أثناء السحب عند الالتقاط: {t:'line'|'right', v, a, b} (لا تُدرج في الشريحة)
+function angSnap(G,i,p){ SNAPFX=null; if(!SNAP) return p; const P=G.pts, nb=freeNb(G,i); let best=null;
+  const consider=(q,err,fx)=>{ if(err<=SNAP_DEG&&(!best||err<best.err)) best={q,err,fx}; };
   const rotv=(v,deg)=>{ const t=rad(deg); return [v[0]*Math.cos(t)-v[1]*Math.sin(t),v[0]*Math.sin(t)+v[1]*Math.cos(t)]; };
   // 1) النقطة المسحوبة طرف قطعة VP: الزاوية عند V بين VP وقطعة أخرى VW
   nb.forEach(v=>{ const V=P[v], d=len(sub(p,V)); if(d<4) return; freeNb(G,v).forEach(w=>{ if(w===i) return; const u=sub(P[w],V); if(len(u)<1e-6) return;
     const a=Math.atan2(crs(u,sub(p,V)),dot(u,sub(p,V)))*180/Math.PI;   // من -180 إلى 180
-    [180,-180,90,-90].forEach(t=>{ const err=Math.abs(a-t); if(err<=SNAP_DEG) consider(add(V,mul(rotv(nrm(u),t),d)),err); }); }); });
+    [180,-180,90,-90].forEach(t=>{ const err=Math.abs(a-t); if(err<=SNAP_DEG) consider(add(V,mul(rotv(nrm(u),t),d)),err,{t:Math.abs(t)===180?'line':'right',v,a:w,b:i}); }); }); });
   // 2) النقطة المسحوبة رأس بين قطعتين AP و PC: على استقامة واحدة (على المستقيم AC) أو قائمة (على الدائرة التي قطرها AC)
   for(let x=0;x<nb.length;x++) for(let y=x+1;y<nb.length;y++){ const A=P[nb[x]], C=P[nb[y]], u=sub(A,p), w=sub(C,p); if(len(u)<4||len(w)<4) continue;
     const a=Math.abs(Math.atan2(crs(u,w),dot(u,w))*180/Math.PI);
-    if(180-a<=SNAP_DEG){ const f=footOn(p,A,C); if(f) consider(f,180-a); }
-    if(Math.abs(a-90)<=SNAP_DEG){ const m=mid(A,C), r=len(sub(C,A))/2, dv=sub(p,m); if(len(dv)>1e-6) consider(add(m,mul(nrm(dv),r)),Math.abs(a-90)); } }
-  return best?best.q:p; }
+    if(180-a<=SNAP_DEG){ const f=footOn(p,A,C); if(f) consider(f,180-a,{t:'line',v:i,a:nb[x],b:nb[y]}); }
+    if(Math.abs(a-90)<=SNAP_DEG){ const m=mid(A,C), r=len(sub(C,A))/2, dv=sub(p,m); if(len(dv)>1e-6) consider(add(m,mul(nrm(dv),r)),Math.abs(a-90),{t:'right',v:i,a:nb[x],b:nb[y]}); } }
+  if(best){ SNAPFX=best.fx; return best.q; } return p; }
+// الإشارة المرئية للالتقاط: خط أزرق متقطع على الاستقامة أو مربع قائمة ملوّن، مع شارة 180° أو 90°
+function snapFxSVG(){ const G=S.p; if(!SNAPFX||!DRAG||S.tab!=='p'||!G||G.kind!=='free') return ''; const P=G.pts, f=SNAPFX, V=P[f.v], A=P[f.a], B=P[f.b]; if(!V||!A||!B) return '';
+  const k=1/Math.max(1,ZOOM.k), col='#1f71de'; let h='<g class="snapfx" pointer-events="none">', lab, at;
+  if(f.t==='line'){ const ends=[A,B].map(q=>add(q,mul(nrm(sub(q,V)),14*k))); h+=`<path d="M${f2(ends[0][0])} ${f2(ends[0][1])}L${f2(V[0])} ${f2(V[1])}L${f2(ends[1][0])} ${f2(ends[1][1])}" stroke="${col}" stroke-width="${f2(5*k)}" stroke-opacity=".22" fill="none" stroke-linecap="round"/><path d="M${f2(ends[0][0])} ${f2(ends[0][1])}L${f2(ends[1][0])} ${f2(ends[1][1])}" stroke="${col}" stroke-width="${f2(1.6*k)}" stroke-dasharray="${f2(5*k)} ${f2(3.5*k)}" fill="none"/>`;
+    lab='180°'; const n=perp(nrm(sub(B,A))); at=add(V,mul(n,-18*k)); }
+  else { const u=nrm(sub(A,V)), w=nrm(sub(B,V)), s0=13*k, q1=add(V,mul(u,s0)), q2=add(add(V,mul(u,s0)),mul(w,s0)), q3=add(V,mul(w,s0));
+    h+=`<path d="M${f2(V[0])} ${f2(V[1])}L${f2(q1[0])} ${f2(q1[1])}L${f2(q2[0])} ${f2(q2[1])}L${f2(q3[0])} ${f2(q3[1])}Z" fill="${col}" fill-opacity=".28" stroke="${col}" stroke-width="${f2(1.6*k)}"/>`;
+    lab='90°'; at=sub(V,mul(nrm(add(u,w)),20*k)); }
+  const bw=30*k, bh=15*k; h+=`<rect x="${f2(at[0]-bw/2)}" y="${f2(at[1]-bh/2)}" width="${f2(bw)}" height="${f2(bh)}" rx="${f2(7.5*k)}" fill="${col}"/><text x="${f2(at[0])}" y="${f2(at[1])}" font-size="${f2(10*k)}" font-family="UULA Sans" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central" direction="ltr">${lab}</text></g>`;
+  return h; }
 function nearCirc(G,q){ if(!SNAP) return -1; let best=-1, bd=9; (G.circles||[]).forEach((o,ci)=>{ const d=Math.abs(len(sub(q,o.c))-o.r); if(d<bd){ bd=d; best=ci; } }); return best; }
 // حذف نقطة: العلاقات التي تعتمد عليها تتحول إلى نقاط حرة في مكانها (لا يُحذف شيء آخر بصمت)
 function engDropPoint(G,k){ const f=x=>x>k?x-1:x;
@@ -1104,7 +1116,7 @@ function dragFrame(){ DRAG_RAF=0; const e=DRAG_EV; if(!DRAG||!e) return;
     else if(key==='r') z.r=cl(oz.r+d[0],20,140); }
   draw();
 }
-const endDrag=e=>{ if(!DRAG) return; if(DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } DRAG_EV=null; const D=DRAG; DRAG=null;
+const endDrag=e=>{ if(!DRAG) return; if(DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } DRAG_EV=null; const D=DRAG; DRAG=null; if(SNAPFX){ SNAPFX=null; draw(); }
   if(D.h==='pan') return;
   if(D.moved){ HIST.push(D.st); if(HIST.length>60) HIST.shift(); save(); return; }
   if(D.h==='vert'){ openPop('vert',+D.i,D.cx,D.cy); }
