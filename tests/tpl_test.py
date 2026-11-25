@@ -31,4 +31,4 @@ async def main():
         if lang=='ar': el=await pg.query_selector('#fig'); await el.screenshot(path='%s_%s.png'%(OUT,k))
         print(('OK  ' if not bad else 'BAD ')+lang+' '+k, bad[:4]); fails+=bool(bad)
     print('errors:',errs or 'none'); await b.close(); sys.exit(1 if fails or errs else 0)
-asyncio.run(main())
+if __name__=="__main__": asyncio.run(main())

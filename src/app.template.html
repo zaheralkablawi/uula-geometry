@@ -265,7 +265,7 @@ const T={
   tCentInsc:['زاوية مركزية وزاوية محيطية','Central and inscribed angle'], tTriInCirc:['مثلث داخل دائرة','Triangle inscribed in a circle'], tCyclicQuad:['رباعي دائري مع قطريه','Cyclic quadrilateral with diagonals'],
   tTwoTan:['مماسان من نقطة خارجية','Two tangents from an external point'], tTanSec:['مماس وقاطع','Tangent and secant'], tTwoSec:['قاطعان من نقطة خارجية','Two secants from an external point'],
   tCross:['وتران متقاطعان','Intersecting chords'], tInTri:['دائرة داخل مثلث','Circle inscribed in a triangle'], tInQuad:['دائرة داخل شكل رباعي','Circle inscribed in a quadrilateral'],
-  tRightAlt:['مثلث قائم مع ارتفاع','Right triangle with altitude'], tGen:['مسألة عامة: وتران متساويان وعمودان من المركز','General problem: equal chords and perpendiculars from the center'],
+  tRightAlt:['مثلث قائم مع ارتفاع','Right triangle with altitude'], tInTriPts:['دائرة داخل مثلث مع نقاط التماس','Incircle with points of tangency'], tTanSecChord:['مماس وقاطع ووتر','Tangent, secant and chord'], tGen:['مسألة عامة: وتران متساويان وعمودان من المركز','General problem: equal chords and perpendiculars from the center'],
   kMid:['منتصف قطعة','Midpoint'], hmid:['انقر قطعة لإضافة منتصفها (مع علامة تساوي الجزأين).','Click a segment to add its midpoint (with equal marks).'],
   kPerp:['عمود من نقطة على قطعة','Perpendicular from a point'], hperp:['انقر نقطة ثم قطعة: يُرسم العمود منها مع علامة الزاوية القائمة.','Click a point, then a segment: the perpendicular is drawn with a right-angle mark.'],
   kInter:['نقطة تقاطع','Intersection'], hinter:['انقر عنصرين (قطعتين، أو قطعة ودائرة، أو دائرتين) لإضافة نقاط تقاطعهما.','Click two objects (two segments, a segment and a circle, or two circles) to add their intersection points.'],
@@ -914,6 +914,14 @@ const TPL={
     const V=T.map((k,i)=>B.d({t:'xtt',a:k,b:T[(i+1)%4],ci:c})); V.forEach((v,i)=>{ B.s(v,T[(i+1)%4]); B.s(T[(i+1)%4],V[(i+1)%4]); }); return B.done(); },
   rightAlt:()=>{ const B=tplB(), Bb=B.pt([40,215]), C=B.pt([290,215]); const ci=B.G.circles.push({c:[165,215],r:125,def:{t:'dia',a:Bb,b:C},hide:true})-1; const A=B.on(ci,-125); B.G.verts.forEach((v,i)=>{ v.name=[NAMES[1],NAMES[2],NAMES[0]][i]; });
     const D=B.d({t:'foot',p:A,a:Bb,b:C}); B.s(A,Bb); B.s(A,C); B.s(Bb,D); B.s(D,C); B.s(A,D); B.right(D,A,C); B.right(A,Bb,C); return B.done(); },
+  // دائرة داخل مثلث مع نقاط التماس (أعمدة من المركز على الأضلاع)
+  inTriPts:()=>{ const B=tplB(), A=B.pt([160,30]), Bb=B.pt([40,220]), C=B.pt([290,220]); const ci=B.G.circles.push({c:[0,0],r:1,def:{t:'in',a:A,b:Bb,c:C}})-1; const O=B.d({t:'cen',ci},isEn()?'O':'م'); solve(B.G);
+    const T=[[A,Bb],[Bb,C],[C,A]].map(([x,y])=>B.d({t:'foot',p:O,a:x,b:y})); B.s(A,T[0]); B.s(T[0],Bb); B.s(Bb,T[1]); B.s(T[1],C); B.s(C,T[2]); B.s(T[2],A); return B.done(); },
+  // مماس وقاطع ووتر يتقاطعان (مرجع ص 93 سؤال 2)
+  tanSecChord:()=>{ const B=tplB(), en=isEn(), N=k=>en?k:{A:'أ',B:'ب',C:'ج',D:'د',E:'هـ',F:'و',M:'م',O:'ن'}[k];
+    const O=B.pt([125,130],N('O')), c=B.circ(O,85), A=B.pt([295,190],N('A')), F=B.d({t:'tan',p:A,ci:c,s:1},N('F')), Bb=B.on(c,-125,N('B')), M=B.d({t:'pc',p:Bb,a:Bb,b:A,ci:c},N('M')),
+      C=B.on(c,-70,N('C')), D=B.on(c,160,N('D')), E=B.d({t:'xll',a:Bb,b:A,c:C,d:D},N('E'));
+    B.s(A,F); B.s(Bb,E); B.s(E,M); B.s(M,A); B.s(C,E); B.s(E,D); return B.done(); },
   // المسألة العامة (مرجع ص 96): دائرة مركزها O، وتر AB وزاوية مركزية 120°، OM ⊥ AB، و C على القوس الأكبر، CD = AB و ON ⊥ CD
   genProblem:()=>{ const B=tplB(), en=isEn(), N=k=>en?k:{A:'أ',B:'ب',C:'ج',D:'د',M:'هـ',N:'و',O:'م'}[k];
     const O=B.pt([160,120],N('O')), c=B.circ(O,95), A=B.on(c,150,N('A')), Bb=B.d({t:'rotc',p:A,ci:c,deg:-120},N('B')), C=B.on(c,-120,N('C')), D=B.d({t:'eqc',p:C,ci:c,a:Bb,b:A},N('D')), M=B.d({t:'foot',p:O,a:A,b:Bb},N('M')), Nn=B.d({t:'foot',p:O,a:C,b:D},N('N'));
@@ -921,7 +929,7 @@ const TPL={
     B.G.circles[c].col='#1f71de'; return B.done(); }
 };
 let G0=null;
-const TPL_LIST=[['diamChord','tDiamChord'],['eqChords','tEqChords'],['perpChord','tPerpChord'],['centInsc','tCentInsc'],['triInCirc','tTriInCirc'],['cyclicQuad','tCyclicQuad'],['twoTangents','tTwoTan'],['tanSecant','tTanSec'],['twoSecants','tTwoSec'],['crossChords','tCross'],['inTri','tInTri'],['inQuad','tInQuad'],['rightAlt','tRightAlt'],['genProblem','tGen']];
+const TPL_LIST=[['diamChord','tDiamChord'],['eqChords','tEqChords'],['perpChord','tPerpChord'],['centInsc','tCentInsc'],['triInCirc','tTriInCirc'],['cyclicQuad','tCyclicQuad'],['twoTangents','tTwoTan'],['tanSecant','tTanSec'],['twoSecants','tTwoSec'],['crossChords','tCross'],['inTri','tInTri'],['inQuad','tInQuad'],['rightAlt','tRightAlt'],['inTriPts','tInTriPts'],['tanSecChord','tTanSecChord'],['genProblem','tGen']];
 function applyTpl(k){ if(!TPL[k]) return; push(); S.empty=false; S.tab='p'; S.p=TPL[k](); FT='move'; PICK=[]; LINK=null; SEL=null; closePop(); syncUI(); draw(); save(); try{ syncChips(); }catch(e){} }
 // النقر على خط ضلع داخل منطقة زاوية (ضلع قصير): الضلع أولى من الزاوية
 function sideUnder(t,e){ if(!t||t.dataset.h!=='ang'||S.tab!=='p') return t; const q=svgPt(e), G=S.p, P=G.pts, n=P.length;
@@ -1299,7 +1307,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') ctxClose(); });
 document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspace')&&SEL&&SEL.k==='circ'&&!(e.target&&e.target.closest&&e.target.closest('input'))){ e.preventDefault(); push(); engDropCircle(S.p,SEL.i); SEL=null; draw(); save(); return; }
   if((e.key==='Delete'||e.key==='Backspace')&&SEL&&!$('pop').hidden&&(SEL.k==='side'||SEL.k==='vert')){ const t=e.target, inInp=t&&t.closest&&t.closest('input');
     if(!inInp||t.dataset.fresh){ e.preventDefault(); delObj(SEL.k,SEL.i); return; } } });
-document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
+document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; if(PICK.length||LINK!=null||CIRC0){ PICK=[]; LINK=null; CIRC0=null; draw(); } else if(FT!=='move'&&S.tab==='p'){ FT='move'; syncUI(); draw(); } } });
 
 /* ---------- واجهة ---------- */
 function setP(el,on){ el.setAttribute('aria-pressed',on?'true':'false'); }
