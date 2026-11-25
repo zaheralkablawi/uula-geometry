@@ -87,6 +87,22 @@ async def main():
     # 7) حذف نقطة تعتمد عليها نقاط أخرى: لا انهيار، والتابعة تبقى حرة
     await E("()=>{ freeDelPoint(S.p,0); solve(S.p); draw(); }"); g=await G()
     check('delete base point keeps others', len(g['pts'])==1 and not g.get('circles',[{}])[0].get('cp'))
+    # 8) وتر موازٍ من نقطة على الدائرة، ومستقيم موازٍ من نقطة حرة
+    await setup("S.p=mkFree([[160,125],[80,170],[240,170],[100,60],[290,30]],[[1,2]]); S.p.circles=[{c:[160,125],r:91.8,cp:0}]; S.p.onc={1:[0,ang(sub([80,170],[160,125]))],2:[0,ang(sub([240,170],[160,125]))]}; solve(S.p)")
+    await tool('addpt'); await click_obj('circ',0)
+    n0=len((await G())['pts'])-1
+    await tool('k_par'); await click_obj('side',0); await click_obj('vert',n0)
+    await tool('k_par'); await click_obj('side',0); await click_obj('vert',4)
+    await tool('move'); await drag(2,[230,200]); await drag(n0,[200,40]); g=await G(); P=g['pts']; A,B=P[1],P[2]; u=sub(B,A)
+    pcs=[(int(k),v) for k,v in g['def'].items() if v['t']=='pc']; prs=[(int(k),v) for k,v in g['def'].items() if v['t']=='par']
+    k,v=pcs[0]; Q=P[k]; Pp=P[v['p']]; cr=lambda a,b:a[0]*b[1]-a[1]*b[0]
+    check('parallel chord stays parallel and on circle', abs(cr(u,sub(Q,Pp)))<1e-6*d(A,B)*d(Q,Pp) and abs(d(Q,g['circles'][0]['c'])-g['circles'][0]['r'])<1e-6)
+    k,v=prs[0]; check('parallel line stays parallel', abs(cr(u,sub(P[k],P[v['p']])))<1e-6*d(A,B)*d(P[k],P[v['p']]))
+    # 9) تمييز قوس وتسميته
+    await tool('k_arc'); await click_obj('vert',1); await click_obj('vert',2); g=await G()
+    check('arc highlighted', len(g['circles'][0].get('arcs',[]))==1)
+    await E("()=>{ S.p.circles[0].arcs[0].lab='80°'; S.p.circles[0].arcs[0].show=true; draw(); }")
+    check('arc label drawn', await E("PR.some(q=>q.t==='txt'&&(q.s.includes('80')||q.s.includes('٨٠')))"))
     check('no page errors', not errs, errs)
     await b.close()
   print('\n%d failures'%len(FAIL)); sys.exit(1 if FAIL else 0)
