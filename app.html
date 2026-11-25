@@ -292,7 +292,7 @@ const T={
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wS:['الراسم','Slant'],
   inserting:['جارٍ الإدراج…','Inserting…'], inserted:['تم الإدراج','Inserted'], updated:['تم التحديث','Updated'], asPic:['أُدرج صورةً (إصدار Office لا يدعم الأشكال القابلة للتعديل)','Inserted as a picture (this Office version can\'t insert editable shapes)'],
   insFail:['تعذّر الإدراج','Could not insert'], noHost:['افتح الأداة من PowerPoint أو Word للإدراج','Open the tool in PowerPoint or Word to insert'],
-  selFirst:['حدّد الشكل أولاً','Select the shape first'], notOurs:['هذا ليس شكلاً من الأداة','This is not a Geometry shape'], loaded:['عدّل ثم اضغط «تحديث»','Edit, then click Update'],
+  selFirst:['حدّد الشكل أولاً','Select the shape first'], notOurs:['هذا ليس شكلاً من الأداة','This is not a Geometry shape'], loaded:['عدّل ثم اضغط «تحديث»','Edit, then click Update'], loadedManual:['هذا الشكل عُدّل يدويًا في باوربوينت. عند «تحديث» يُرسم من جديد، وتُحفظ النسخة المعدّلة يدويًا خارج الشريحة على اليسار.','This shape was edited manually in PowerPoint. On Update it is redrawn, and the manually edited copy is kept off the slide on the left.'],
   latest:['لديك آخر إصدار','You have the latest version'], hasUpd:['يوجد تحديث','An update is available'], noConn:['تعذّر الاتصال','Could not connect'],
   aboutB:['ترسم الأشكال الهندسية المستوية والدائرة والمجسمات، مع تسمية الرؤوس والأطوال والزوايا وعلامات التساوي والتوازي، وتُدرجها في الباوربوينت أشكالاً قابلة للتعديل، وفي الوورد صورةً.','Draws plane shapes, circles and solids with vertex names, lengths, angles and equal/parallel marks. Inserts editable shapes in PowerPoint and a picture in Word.']
 };
@@ -910,12 +910,15 @@ $('fig').addEventListener('pointerdown',e=>{
   e.preventDefault(); $('fig').setPointerCapture(e.pointerId);
   DRAG={h:t.dataset.h, i:t.dataset.i, k:t.dataset.k, p0:svgPt(e), st:JSON.stringify(S), moved:false, cx:e.clientX, cy:e.clientY, edge:e.shiftKey};
 });
-$('fig').addEventListener('pointermove',e=>{
-  if(!DRAG) return; const p=svgPt(e); const d=sub(p,DRAG.p0);
+// السحب: الحالة الأصلية تُقرأ مرة واحدة عند بدء السحب، والرسم مرة واحدة لكل إطار شاشة مهما كثرت أحداث المؤشر
+let DRAG_EV=null, DRAG_RAF=0;
+$('fig').addEventListener('pointermove',e=>{ if(!DRAG) return; DRAG_EV=e; if(!DRAG_RAF) DRAG_RAF=requestAnimationFrame(dragFrame); });
+function dragFrame(){ DRAG_RAF=0; const e=DRAG_EV; if(!DRAG||!e) return;
+  const p=svgPt(e); const d=sub(p,DRAG.p0);
   if(!DRAG.moved&&len(d)<2.5) return;
   if(!DRAG.moved){ DRAG.moved=true; closePop(); }
-  const O=JSON.parse(DRAG.st);
-  if(DRAG.h==='vert'){ S.p.pts=O.p.pts; setVertex(+DRAG.i,p); }
+  const O=DRAG.O||(DRAG.O=JSON.parse(DRAG.st));
+  if(DRAG.h==='vert'){ S.p.pts=O.p.pts.map(q=>q.slice()); if(S.p.on) Object.entries(O.p.on||{}).forEach(([k,v])=>{ S.p.on[k]=v.slice(); }); if(S.p.onc) Object.entries(O.p.onc||{}).forEach(([k,v])=>{ S.p.onc[k]=v.slice(); }); if(S.p.circles&&O.p.circles) S.p.circles.forEach((o,i)=>{ const oo=O.p.circles[i]; if(oo){ o.c=oo.c.slice(); o.r=oo.r; } }); setVertex(+DRAG.i,p); }
   else if(DRAG.h==='body'||DRAG.h==='side'||DRAG.h==='ang'){ S.p.pts=O.p.pts.map(q=>add(q,d)); if(O.p.circles) S.p.circles=O.p.circles.map(o=>({...o,c:add(o.c,d)})); }   // تحريك الشكل كله
   else if(DRAG.h==='circ'){ const G=S.p, ci=+DRAG.i; G.pts=O.p.pts.map(q=>q.slice()); G.circles=O.p.circles.map(o=>({...o,c:o.c.slice()})); const o=G.circles[ci], oo=O.p.circles[ci];
     if(o.def){ const ks=['a','b','c'].map(x=>o.def[x]).filter(x=>x!=null); ks.forEach(k=>{ if(!isDerived(G,k)) G.pts[k]=add(O.p.pts[k],d); }); solve(G,ks.map(k=>'p'+k)); }   // دائرة معرّفة بنقاط: تُنقل نقاطها
@@ -933,8 +936,8 @@ $('fig').addEventListener('pointermove',e=>{
     else if(key==='d') z.d=cl(oz.d+(d[0]-d[1])/(2*KX+.01)*.5,30,260);
     else if(key==='r') z.r=cl(oz.r+d[0],20,140); }
   draw();
-});
-const endDrag=e=>{ if(!DRAG) return; const D=DRAG; DRAG=null;
+}
+const endDrag=e=>{ if(!DRAG) return; if(DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } DRAG_EV=null; const D=DRAG; DRAG=null;
   if(D.moved){ HIST.push(D.st); if(HIST.length>60) HIST.shift(); save(); return; }
   if(D.h==='vert'){ openPop('vert',+D.i,D.cx,D.cy); }
   else if(D.h==='pt'){ openPop('pt',D.i,D.cx,D.cy); }
@@ -1280,6 +1283,7 @@ function normA(a){ return ((a%360)+360)%360; }
 
 // يبني الشكل في الشريحة أشكالاً عادية مجمّعة
 let GROUP_MADE=false;
+let ARC_PROBE=null, TRI_K=null; const MODEL_V=2;   // إصدار نموذج البيانات المحفوظ في وسم الشكل
 async function insertNative(pr,json,bb,slideId){
   GROUP_MADE=false;
   await PowerPoint.run(async ctx=>{
@@ -1288,10 +1292,11 @@ async function insertNative(pr,json,bb,slideId){
     let PL=null;
     if(EDIT&&EDIT.place){ PL=EDIT.place; sc=PL.a; }
     else if(EDIT){ ox=EDIT.left; oy=EDIT.top; sc=EDIT.w?EDIT.width/EDIT.w:1; }
-    else { const ss=ctx.presentation.getSelectedShapes(); ss.load('items/left,items/top,items/width'); shapes.load('items/name'); await ctx.sync();
+    else { const ss=ctx.presentation.getSelectedShapes(); ss.load('items/left,items/top,items/width'); shapes.load('items/name');
+      // مقاس الشريحة يُقرأ في الرحلة نفسها (رحلة واحدة بدل اثنتين)، وإن لم تدعمه النسخة نعيد القراءة بدونه
+      let W=960, H=540, ps=null; try{ ps=ctx.presentation.pageSetup; ps.load('slideWidth,slideHeight'); await ctx.sync(); if(ps.slideWidth){ W=ps.slideWidth; H=ps.slideHeight; } }catch(e){ ss.load('items/left,items/top,items/width'); shapes.load('items/name'); await ctx.sync(); }
       if(ss.items.length){ const s=ss.items[0]; ox=s.left+s.width+20; oy=s.top; }
       else { // وسط الشريحة، وكل شكل جديد يُزاح قليلاً عن السابق حتى لا يغطيه
-        let W=960, H=540; try{ const ps=ctx.presentation.pageSetup; ps.load('slideWidth,slideHeight'); await ctx.sync(); if(ps.slideWidth) { W=ps.slideWidth; H=ps.slideHeight; } }catch(e){}
         const n=shapes.items.filter(s=>s.name===TITLE).length; ox=Math.max(10,(W-bb.w)/2)+n*24; oy=Math.max(10,(H-bb.h)/2)+n*24; } }
     const X=PL?(x=>PL.bx+x*PL.a):(x=>ox+(x-bb.x)*sc), Y=PL?(y=>PL.by+y*PL.a):(y=>oy+(y-bb.y)*sc), made=[], arcs=[], tris=[];
     const line=(sh,c,w,dash)=>{ sh.lineFormat.visible=true; sh.lineFormat.color=c; sh.lineFormat.weight=w; sh.lineFormat.dashStyle=dash==='dot'?'RoundDot':dash?'Dash':'Solid'; };
@@ -1325,16 +1330,18 @@ async function insertNative(pr,json,bb,slideId){
         tf.textRange.font.name=p.font||'UULA Sans'; tf.textRange.font.size=p.fs; tf.textRange.font.color=p.c; tf.textRange.paragraphFormat.horizontalAlignment='Center';
         s.fill.clear(); s.lineFormat.visible=false; made.push(s); }
     }
-    await ctx.sync();
-    // معايرة وحدة المقابض من القيم الافتراضية (القوس يبدأ عند 270°، والمثلث رأسه في المنتصف)
-    if(arcs.length){ let probe=null;
-      const tmp=shapes.addGeometricShape('Arc',{left:0,top:0,width:10,height:10}); const v=tmp.adjustments.get(0); await ctx.sync(); probe=v.value; tmp.delete();
-      const big=Math.abs(probe)>1000, neg=probe<0, k=big?60000:1;
+    // رحلة واحدة: إنشاء الأشكال وقراءة معرّفاتها، ومعايرة وحدة مقابض القوس والمثلث (مرة واحدة في الجلسة)
+    let tmp=null, pv=null, tv=null;
+    if(arcs.length&&ARC_PROBE==null){ tmp=shapes.addGeometricShape('Arc',{left:0,top:0,width:10,height:10}); pv=tmp.adjustments.get(0); }
+    if(tris.length&&TRI_K==null) tv=tris[0].s.adjustments.get(0);
+    made.forEach(s=>s.load('id')); await ctx.sync();
+    if(pv){ ARC_PROBE=pv.value; tmp.delete(); } if(tv) TRI_K=(tv.value||.5)/.5;
+    // القيم الافتراضية: القوس يبدأ عند 270°، والمثلث رأسه في المنتصف
+    if(arcs.length){ const probe=ARC_PROBE, big=Math.abs(probe)>1000, neg=probe<0, k=big?60000:1;
       const conv=a=>{ let x=normA(a); if(neg&&x>180) x-=360; return x*k; };
       arcs.forEach(a=>{ a.s.adjustments.set(0,conv(a.a0)); a.s.adjustments.set(1,conv(a.a1)); }); }
-    if(tris.length){ const v=tris[0].s.adjustments.get(0); await ctx.sync(); const k=(v.value||.5)/.5; tris.forEach(o=>o.s.adjustments.set(0,o.t*k)); }
-    made.forEach(s=>s.load('id')); await ctx.sync();
-    const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; g.tags.add(TAG,json); g.load('id'); await ctx.sync(); GROUP_MADE=true;
+    if(tris.length) tris.forEach(o=>o.s.adjustments.set(0,o.t*TRI_K));
+    const g=shapes.addGroup(made.map(s=>s.id)); g.name=TITLE; { let meta; try{ meta=JSON.parse(json); }catch(e){ meta=null; } if(meta){ meta.v=MODEL_V; meta.n=made.length; meta.h=bb.h; json=JSON.stringify(meta); } } g.tags.add(TAG,json); g.load('id'); await ctx.sync(); GROUP_MADE=true;
     if(EDIT){ const old=shapes.getItemOrNullObject(EDIT.id); await ctx.sync();
       // الصورة الأصلية لا تُحذف: تُنقل خارج الشريحة إلى يسارها للمراجعة
       if(!old.isNullObject){ if(EDIT.pic){
@@ -1346,6 +1353,7 @@ async function insertNative(pr,json,bb,slideId){
             if(!hit&&EDIT.near&&EDIT.near!==g.id){ try{ const nr=shapes.getItemOrNullObject(EDIT.near); await ctx.sync(); if(!nr.isNullObject) nr.delete(); await ctx.sync(); }catch(e){ console.error(e); } } }
           else { old.load('width'); await ctx.sync(); old.tags.add('UULA_GEO_SRC',JSON.stringify({left:EDIT.left,top:EDIT.top})); old.left=-old.width-20; }
           g.tags.add('UULA_GEO_FROM',String(EDIT.id)); }
+        else if(EDIT.manual){ old.load('width'); await ctx.sync(); old.left=-old.width-20; old.name=TITLE+' (manual)'; try{ old.tags.delete(TAG); }catch(e){} }   // عُدّل يدويًا: يُحفظ خارج الشريحة بدل حذفه
         else old.delete(); await ctx.sync(); }
       g.load('id'); await ctx.sync(); EDIT.id=g.id; }
   });
@@ -1390,11 +1398,15 @@ async function loadSelected(quiet){
   try{ let data=null, ed=null;
     if(HOST==='PowerPoint'){ await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width'); await ctx.sync();
         if(!ss.items.length) throw L('selFirst'); const s=ss.items[0], t=s.tags.getItemOrNullObject(TAG); t.load('value'); await ctx.sync();
-        if(t.isNullObject) throw L('notOurs'); data=JSON.parse(t.value); ed={id:s.id,left:s.left,top:s.top,width:s.width,w:data.w}; }); }
+        if(t.isNullObject) throw L('notOurs'); data=JSON.parse(t.value); ed={id:s.id,left:s.left,top:s.top,width:s.width,w:data.w};
+        // كشف التعديل اليدوي داخل باوربوينت: عدد العناصر أو نسبة الأبعاد تغيّرت منذ الإدراج
+        if(data.n||data.h){ let cnt=null; try{ const gs=s.group.shapes; gs.load('items/id'); s.load('height'); await ctx.sync(); cnt=gs.items.length; }catch(e){ try{ s.load('height'); await ctx.sync(); }catch(e2){} }
+          const ratio0=data.h?data.w/data.h:null, ratio1=s.height?s.width/s.height:null;
+          ed.manual=(data.n&&cnt!=null&&cnt!==data.n)||(ratio0&&ratio1&&Math.abs(ratio1/ratio0-1)>.03); } }); }
     else { await Word.run(async ctx=>{ const pics=ctx.document.getSelection().inlinePictures; pics.load('items/altTextTitle,items/altTextDescription'); await ctx.sync();
         if(!pics.items.length) throw L('selFirst'); const p=pics.items[0]; if(p.altTextTitle!==TITLE) throw L('notOurs'); data=JSON.parse(p.altTextDescription); ed={word:true}; }); }
     if(quiet&&EDIT&&EDIT.id===ed.id) return true;
-    const d=defaults(); push(); S=Object.assign(d,data.s); S.look=Object.assign(d.look,data.s.look||{}); closePop(); syncUI(); draw(); save(); setEdit(ed); msg(L('loaded'),'good'); return true;
+    const d=defaults(); push(); S=Object.assign(d,data.s); S.look=Object.assign(d.look,data.s.look||{}); closePop(); syncUI(); draw(); save(); setEdit(ed); msg(L(ed.manual?'loadedManual':'loaded'),ed.manual?'bad':'good'); return true;
   }catch(e){ if(!quiet){ console.error(e); msg(typeof e==='string'?e:L('insFail'),'bad'); } return false; }
 }
 $('loadSelItem').addEventListener('click',()=>loadSelected(false));

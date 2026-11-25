@@ -18,17 +18,20 @@ async ()=>{
  };
  for(const [k,f] of Object.entries(cases)){
    f(); syncUI&&syncUI(); draw(); const t=[];
-   for(let i=0;i<150;i++){ const a=performance.now(); draw(); t.push(performance.now()-a); }
+   for(let i=0;i<150;i++){ const a=performance.now(); draw(); $('fig').getBBox(); document.body.offsetHeight; t.push(performance.now()-a); }
    const b=[]; for(let i=0;i<150;i++){ const a=performance.now(); build(); b.push(performance.now()-a); }
    R[k]={draw:q(t),build:q(b),stateKB:+(JSON.stringify(S).length/1024).toFixed(1),prims:PR.length};
  }
+ if(typeof applyTpl==='function'){ applyTpl('genProblem'); const t=[]; for(let i=0;i<150;i++){ const a=performance.now(); draw(); $('fig').getBBox(); t.push(performance.now()-a); } R.genProblem={draw:q(t),prims:PR.length};
+   const t2=[]; for(let i=0;i<150;i++){ const a=performance.now(); setVertex(2,add(S.p.pts[2],[Math.sin(i)*3,1])); t2.push(performance.now()-a); } R.genProblem.solve_on_drag=q(t2);
+   const t3=[]; for(let i=0;i<60;i++){ const a=performance.now(); applyTpl('genProblem'); t3.push(performance.now()-a); } R.genProblem.create=q(t3); }
  // حدث سحب حقيقي على رأس (المسار الكامل: parse + قيد + draw)
  cases.composite(); draw();
  const fig=$('fig'), m=fig.getScreenCTM(), sc=([x,y])=>[x*m.a+y*m.c+m.e, x*m.b+y*m.d+m.f];
  const v=document.querySelector('[data-h="vert"][data-i="3"]'); const p0=S.p.pts[3]; const [x0,y0]=sc(p0);
  v.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:x0,clientY:y0,pointerId:1,button:0}));
- const t=[]; for(let i=1;i<=150;i++){ const [x,y]=sc([p0[0]+Math.sin(i/10)*30,p0[1]+i%30]); const a=performance.now(); fig.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:x,clientY:y,pointerId:1})); t.push(performance.now()-a); }
- document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1})); window.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1}));
+ const t=[]; for(let i=1;i<=150;i++){ const [x,y]=sc([p0[0]+Math.sin(i/10)*30,p0[1]+i%30]); const a=performance.now(); fig.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:x,clientY:y,pointerId:1})); if(typeof dragFrame==='function'&&DRAG_RAF){ cancelAnimationFrame(DRAG_RAF); dragFrame(); } $('fig').getBBox(); document.body.offsetHeight; t.push(performance.now()-a); }
+ fig.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1}));
  R.drag_event_composite=q(t);
  return R;
 }'''
