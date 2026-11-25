@@ -17,7 +17,7 @@ async def main():
       res={}
       await E("applyTpl('%s')"%key); res['1 create']=(await E(CHECK))==[]
       if key=='eqChords':   # بالأدوات: عمودان من المركز على الوترين (كما في ص60)
-        await E("""(()=>{ const G=S.p; FT='k_perp'; const O=0; [[1,2],[3,4]].forEach(([a,b])=>{ PICK=[]; consTool({dataset:{h:'vert',i:String(O)}},{}); consTool({dataset:{h:'side',i:String(sideIndexOf(G,a,b))}},{}); }); FT='move'; draw(); })()""")
+        await E("""(()=>{ const G=S.p; FT='k_perp'; const O=0; [[1,2],[3,4]].forEach(([a,b])=>{ FT='k_perp'; PICK=[]; consTool({dataset:{h:'vert',i:String(O)}},{}); consTool({dataset:{h:'side',i:String(sideIndexOf(G,a,b))}},{}); }); FT='move'; draw(); })()""")
         res['1 create']=res['1 create'] and (await E("Object.values(S.p.def).filter(d=>d.t==='foot').length"))==2
       bad=[]
       for i in await E("S.p.pts.map((_,i)=>i).filter(i=>!isDerived(S.p,i))"):
