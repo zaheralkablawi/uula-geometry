@@ -30,6 +30,7 @@ header .bt .root:only-child{color:var(--fg);font-size:15px;letter-spacing:0}
 .menu{position:absolute;top:34px;left:0!important;right:auto!important;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
 .menu button{border:0;background:none;text-align:start;padding:6px 9px;border-radius:5px;font-size:12px;cursor:pointer}
 .menu button:hover{background:var(--bg)}
+#fig .hv.hd{stroke:#c98a00;stroke-dasharray:2 1.5;cursor:default}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
 .seg button{flex:1;height:28px;border:0;background:none;font-size:12.5px;cursor:pointer;white-space:nowrap;padding:0 5px}
 .seg button+button{border-inline-start:1px solid var(--line)}
@@ -161,6 +162,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
 
   <div class="opt" id="optTri"><span class="label" data-i="type">النوع</span><div class="seg" id="segTri"></div></div>
   <div class="opt" id="optFree"><span class="label" data-i="tools">أدوات</span><div class="seg" id="segFree"></div></div>
+  <div class="opt" id="optCons"><span class="label" data-i="cons">إنشاء</span><div class="seg" id="segCons"></div></div>
   <div class="opt" id="optN"><span class="label" data-i="sides">الأضلاع</span><div class="seg" id="segN"></div></div>
   <div class="opt" id="optHid"><span class="label" data-i="hidden">الأحرف المخفية</span><div class="seg" id="segHid"></div></div>
 
@@ -253,7 +255,17 @@ const T={
   tri:['مثلث','Triangle'], sq:['مربع','Square'], rect:['مستطيل','Rectangle'], para:['متوازي أضلاع','Parallelogram'], rho:['معين','Rhombus'], trap:['شبه منحرف','Trapezoid'], poly:['مضلع منتظم','Regular polygon'], circ:['دائرة','Circle'],
   cube:['مكعب','Cube'], box:['متوازي مستطيلات','Cuboid'], prism:['منشور','Prism'], pyr:['هرم','Pyramid'], cyl:['أسطوانة','Cylinder'], cone:['مخروط','Cone'], sph:['كرة','Sphere'],
   circSel:['دائرة محددة: اسحبها لتحريكها، واسحب من محيطها مع Shift لتغيير حجمها، أو اضغط Delete لحذفها','Circle selected: drag to move, Shift+drag to resize, Delete to remove'],
-  ftCirc:['دائرة: انقر المركز ثم نقطة على المحيط','Circle: click the center, then a point on it'],
+  ftCirc:['دائرة: انقر المركز ثم نقطة على المحيط (النقر على نقاط موجودة يربط الدائرة بها)','Circle: click the center, then a point on it (clicking existing points binds the circle to them)'],
+  cons:['إنشاء','Construct'],
+  kMid:['منتصف قطعة','Midpoint'], hmid:['انقر قطعة لإضافة منتصفها (مع علامة تساوي الجزأين).','Click a segment to add its midpoint (with equal marks).'],
+  kPerp:['عمود من نقطة على قطعة','Perpendicular from a point'], hperp:['انقر نقطة ثم قطعة: يُرسم العمود منها مع علامة الزاوية القائمة.','Click a point, then a segment: the perpendicular is drawn with a right-angle mark.'],
+  kInter:['نقطة تقاطع','Intersection'], hinter:['انقر عنصرين (قطعتين، أو قطعة ودائرة، أو دائرتين) لإضافة نقاط تقاطعهما.','Click two objects (two segments, a segment and a circle, or two circles) to add their intersection points.'],
+  kTan:['مماس','Tangent'], htan:['انقر نقطة ثم دائرة: من نقطة خارجها يُرسم المماسان، ومن نقطة عليها يُرسم المماس عندها.','Click a point, then a circle: from an outside point both tangents are drawn; from a point on it, the tangent there.'],
+  kC3:['دائرة تمر بثلاث نقاط (المحيطة)','Circle through three points (circumcircle)'], hc3:['انقر ثلاث نقاط: تُرسم الدائرة المارة بها ومركزها.','Click three points: the circle through them and its center are drawn.'],
+  kCin:['الدائرة الداخلية لمثلث','Incircle of a triangle'], hcin:['انقر رؤوس المثلث الثلاثة: تُرسم دائرته الداخلية ومركزها.','Click the three vertices: its incircle and center are drawn.'],
+  kCen:['مركز الدائرة','Circle center'], hcen:['انقر دائرة لإضافة مركزها كنقطة (سحب المركز يحرك الدائرة).','Click a circle to add its center as a point (dragging it moves the circle).'],
+  kArc:['تمييز قوس','Highlight an arc'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر، وتكرار ذلك يحوّله للأكبر ثم يزيله.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
+  kNone:['لا يوجد تقاطع.','No intersection.'], kInside:['النقطة داخل الدائرة: لا يمكن رسم مماس منها.','The point is inside the circle: no tangent from it.'], kCollinear:['النقاط على استقامة واحدة.','The points are collinear.'], kArcNeed:['النقطتان يجب أن تكونا على الدائرة نفسها.','Both points must be on the same circle.'],
   ftSeg:['قطعة مستقيمة: انقر بدايتها ثم نهايتها في أي مكان','Segment: click its start, then its end, anywhere'], hintSeg:['انقر بداية القطعة ثم نهايتها (في أي مكان أو على نقطة موجودة).','Click the start of the segment, then its end (anywhere or on an existing point).'],
   names:['أسماء الرؤوس','Vertex names'], free:['شكل مركب','Composite shape'], tools:['أدوات','Tools'], ftMove:['تحريك','Move'], ftLink:['وصل نقطتين','Connect'], ftAdd:['نقطة على قطعة','Point on segment'], ftDel:['حذف','Delete'], hintFree:['اسحب النقاط لتغيير الشكل، وانقر نقطة لتسميتها ووضع علامات زواياها، وانقر قطعة لعلاماتها وطولها.','Drag points to reshape; click a point for its name and angle marks; click a segment for its marks and length.'], hintLink:['انقر نقطة ثم نقطة أخرى لرسم قطعة بينهما.','Click a point, then another to draw a segment.'], hintAdd:['انقر على قطعة لإضافة نقطة عليها.','Click a segment to add a point on it.'], hintDel:['انقر قطعة أو نقطة لحذفها.','Click a segment or point to delete it.'], arcsAll:['رموز الزوايا','Angle marks'], arcOnly:['رمز الزاوية (بدون قياس)','Angle mark (no measure)'], symStar:['نجمة داخل الزاوية','Star in the angle'], dirCw:['زاوية موجهة: السهم مع عقارب الساعة','Directed angle: clockwise arrow'], dirCcw:['زاوية موجهة: السهم عكس عقارب الساعة','Directed angle: counterclockwise arrow'], directed:['زاوية موجهة','Directed'], arrEnd:['سهم عند نهاية القطعة','Arrow at the end'], arrStart:['سهم عند بداية القطعة','Arrow at the start'], symDot:['نقطة داخل الزاوية','Dot in the angle'], angNum:['رقم','No.'], angNumT:['رقم الزاوية (اسمها)','Angle number (its name)'], arcsShort:['التساوي','Equal'], point:['النقطة','Point'], showName:['إظهار الاسم','Show name'], lens:['الأطوال','Lengths'], angs:['الزوايا','Angles'], alt:['الارتفاع','Altitude'], med:['المتوسط','Median'], bis:['منصف الزاوية','Bisector'], diag:['القطران','Diagonals'],
   pnames:['أسماء النقاط','Point names'], center:['المركز','Center'], radius:['نصف القطر','Radius'], diam:['القطر','Diameter'], chord:['الوتر','Chord'], tangent:['المماس','Tangent'], arc:['القوس','Arc'], sector:['القطاع','Sector'], central:['الزاوية المركزية','Central angle'], inscribed:['الزاوية المحيطية','Inscribed angle'], meas:['القياسات','Measures'],
@@ -403,7 +415,9 @@ function outward(P,i){ const n=P.length, a=P[(i-1+n)%n], b=P[(i+1)%n], u=nrm(sub
 function buildFree(){
   const G=S.p, P=G.pts, fs=LK().fs, C=cen(P);
   // دوائر الشكل المركب (من صورة دائرة فيها أوتار ومماسات وقواطع)
-  (G.circles||[]).forEach(o=>PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0:0,a1:360,c2:o.col||LK().line,w:o.w||LK().w,dash:false}));
+  (G.circles||[]).forEach(o=>{ if(o.bad) return; PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0:0,a1:360,c2:o.col||LK().line,w:o.w||LK().w,dash:!!o.dash});
+    (o.arcs||[]).forEach(z=>{ if(!P[z.a]||!P[z.b]) return; let a0=ang(sub(P[z.a],o.c)), a1=ang(sub(P[z.b],o.c)); let sw=((a1-a0)%360+360)%360; if((sw>180)!==!!z.big){ const t=a0; a0=a1; a1=t; sw=360-sw; }
+      PR.push({t:'ell',c:o.c,rx:o.r,ry:o.r,a0,a1:a0+sw,c2:z.c||'#1f71de',w:(o.w||LK().w)*2.2,dash:false}); }); });
   G.sides.forEach(sd=>{ seg(P[sd.a],P[sd.b],{c:sd.c,w:sd.w,dash:segDash(sd)}); segArrows(P[sd.a],P[sd.b],sd.arr,sd.c); });
   G.sides.forEach(sd=>{ const a=P[sd.a], b=P[sd.b], both=sd.ticks&&sd.par; sideTicks(a,b,sd.ticks,both?-9:0); parMarks(a,b,sd.par,both?9:0);
     if(sd.show){ const m=mid(a,b); let nn=perp(nrm(sub(b,a))); if(dot(nn,sub(m,C))<0) nn=mul(nn,-1);
@@ -616,10 +630,11 @@ function draw(){
   const pr=build(); let h=(BG&&EDIT&&EDIT.pic&&!BG.off?`<image href="${BG.src}" x="${f2(BG.x)}" y="${f2(BG.y)}" width="${f2(BG.w)}" height="${f2(BG.h)}" opacity=".35" preserveAspectRatio="none" pointer-events="none"/>`:'')+'<g>'+pr.map(primSVG).join('')+'</g><g id="hits">';
   if(S.empty){}
   else if(S.tab==='p'&&S.p.kind==='free'){ const G=S.p, P=G.pts;
-    (G.circles||[]).forEach((o,i)=>{ h+=`<circle class="hs${SEL&&SEL.k==='circ'&&SEL.i===i?' sel':''}" data-h="circ" data-i="${i}" cx="${f2(o.c[0])}" cy="${f2(o.c[1])}" r="${f2(o.r)}" fill="none"/>`; });
-    G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
+    const pk=(k,i)=>PICK.some(x=>x.h===k&&x.i===i);
+    (G.circles||[]).forEach((o,i)=>{ h+=`<circle class="hs${(SEL&&SEL.k==='circ'&&SEL.i===i)||pk('circ',i)?' sel':''}" data-h="circ" data-i="${i}" cx="${f2(o.c[0])}" cy="${f2(o.c[1])}" r="${f2(o.r)}" fill="none"/>`; });
+    G.sides.forEach((sd,i)=>{ const a=P[sd.a], b=P[sd.b]; h+=`<path class="hs${(SEL&&SEL.k==='side'&&SEL.i===i)||pk('side',i)?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; });
     P.forEach((p,i)=>freeAngles(G,i).forEach(([a,b])=>{ h+=secHit(p,P[a],P[b],i,angKey(i,a,b)); }));   // فوق الأضلاع: الزوايا الضيقة تبقى قابلة للنقر
-    P.forEach((p,i)=>{ h+=`<circle class="hv${(SEL&&SEL.k==='vert'&&SEL.i===i)||LINK===i?' sel':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
+    P.forEach((p,i)=>{ h+=`<circle class="hv${(SEL&&SEL.k==='vert'&&SEL.i===i)||LINK===i||pk('vert',i)?' sel':''}${isDerived(G,i)?' hd':''}" data-h="vert" data-i="${i}" cx="${f2(p[0])}" cy="${f2(p[1])}" r="5"/>`; });
   } else if(S.tab==='p'){ const P=S.p.pts, n=P.length;
     h+=`<path class="hb" data-h="body" d="M${P.map(q=>f2(q[0])+' '+f2(q[1])).join('L')}Z"/>`;
     for(let i=0;i<n;i++){ const a=P[i], b=P[(i+1)%n]; h+=`<path class="hs${SEL&&SEL.k==='side'&&SEL.i===i?' sel':''}" data-h="side" data-i="${i}" d="M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}"/>`; }
@@ -652,11 +667,11 @@ function svgPt(e){ const s=$('fig'), m=s.getScreenCTM().inverse(); return [e.cli
 function setVertex(i,p){
   const G=S.p, P=G.pts, n=P.length, k=G.kind, o=P.map(q=>q.slice());
   if(k==='free'){ const on=G.on||(G.on={});
+    if(isDerived(G,i)) return;   // نقطة ناتجة عن إنشاء (منتصف، تقاطع، تماس…): تتحرك مع ما تعتمد عليه فقط
     const oc=G.onc&&G.onc[i]&&(G.circles||[])[G.onc[i][0]];
     if(oc){ G.onc[i][1]=ang(sub(p,oc.c)); P[i]=circAt(oc,G.onc[i][1]); }
     else if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=p;
-    for(let pass=0;pass<2;pass++) Object.entries(on).forEach(([j,[a,b,tt]])=>{ if(+j!==i&&P[a]&&P[b]) P[+j]=add(P[a],mul(sub(P[b],P[a]),tt)); });
-    return; }
+    solve(G,['p'+i]); return; }
   if(k==='tri'){
     if(G.sub==='sca') P[i]=p;
     else if(G.sub==='iso'){ if(i===0){ const m=mid(P[1],P[2]), d=nrm(sub(P[2],P[1])); P[0]=sub(p,mul(d,dot(sub(p,m),d))); }
@@ -678,13 +693,90 @@ function setVertex(i,p){
 
 let DRAG=null, FT='move', LINK=null;
 // نقاط مربوطة بدائرة (onc: رقم النقطة ← [رقم الدائرة، الزاوية]): تبقى على المحيط عند سحبها وعند تحريك الدائرة أو تكبيرها
+/* ========== المحرك الهندسي للشكل المركب: علاقات النقاط والدوائر ==========
+   النقاط الحرة تُسحب بحرية. النقاط المقيّدة:
+     on[k]=[a,b,t]        نقطة على القطعة ab بنسبة t (تُسحب على القطعة)
+     onc[k]=[ci,زاوية]     نقطة على محيط الدائرة ci (تُسحب على المحيط)
+     def[k]={t:...}        نقطة ناتجة عن إنشاء (لا تُسحب، تُحسب دائمًا):
+        mid  {a,b}          منتصف قطعة
+        foot {p,a,b}        موقع العمود من p على المستقيم ab
+        xll  {a,b,c,d}      تقاطع المستقيمين ab و cd
+        xlc  {a,b,ci,s}     تقاطع المستقيم ab مع الدائرة ci (s=1 أو -1 لاختيار النقطة)
+        xcc  {ci,cj,s}      تقاطع دائرتين
+        tan  {p,ci,s}       نقطة التماس للمماس المرسوم من p إلى الدائرة ci
+        cen  {ci}           مركز دائرة معرّفة بنقاط
+   الدوائر: {c,r} وقد يكون لها:
+     cp  رقم نقطة المركز (الدائرة تتبع النقطة)،  tp  رقم نقطة على المحيط تحدد نصف القطر،
+     def {t:'3p'|'out'|'in', a,b,c}  دائرة تمر بثلاث نقاط / محيطة / داخلية لمثلث.
+   الحل: ترتيب طوبولوجي حسب الاعتماد ثم حساب كل عنصر مرة واحدة، والعناصر التابعة لما تغيّر فقط.
+   الحالات المستحيلة (مماس من نقطة داخل الدائرة، مستقيمان متوازيان…) لا تغيّر موضع النقطة وتُعلَّم bad. */
+const EPS=1e-9;
 function circAt(o,a){ return add(o.c,[Math.cos(rad(a))*o.r,Math.sin(rad(a))*o.r]); }
+function lineX4(A,B,C,D){ const r=sub(B,A), s=sub(D,C), den=crs(r,s); if(Math.abs(den)<EPS*(len(r)*len(s)+1)) return null; const t=crs(sub(C,A),s)/den; return add(A,mul(r,t)); }
+function footOn(P,A,B){ const d=sub(B,A), L2=dot(d,d); if(L2<EPS) return null; return add(A,mul(d,dot(sub(P,A),d)/L2)); }
+function lineCirc(A,B,o){ const d=sub(B,A), L2=dot(d,d); if(L2<EPS) return null; const f=sub(A,o.c), b=dot(f,d)/L2, c=(dot(f,f)-o.r*o.r)/L2, disc=b*b-c; if(disc<-1e-9) return null;
+  const q=Math.sqrt(Math.max(0,disc)); return [add(A,mul(d,-b+q)),add(A,mul(d,-b-q))]; }
+function circCirc(o1,o2){ const d=sub(o2.c,o1.c), D=len(d); if(D<EPS||D>o1.r+o2.r+1e-9||D<Math.abs(o1.r-o2.r)-1e-9) return null;
+  const a=(o1.r*o1.r-o2.r*o2.r+D*D)/(2*D), h=Math.sqrt(Math.max(0,o1.r*o1.r-a*a)), m=add(o1.c,mul(d,a/D)), n=perp(mul(d,1/D)); return [add(m,mul(n,h)),add(m,mul(n,-h))]; }
+function tangentPts(P,o){ const d=sub(P,o.c), D=len(d); if(D<=o.r+1e-9) return null; const a=Math.acos(o.r/D), b=Math.atan2(d[1],d[0]);
+  return [add(o.c,[Math.cos(b+a)*o.r,Math.sin(b+a)*o.r]),add(o.c,[Math.cos(b-a)*o.r,Math.sin(b-a)*o.r])]; }
+function circ3(A,B,C){ const d=2*(A[0]*(B[1]-C[1])+B[0]*(C[1]-A[1])+C[0]*(A[1]-B[1])); if(Math.abs(d)<EPS) return null;
+  const a2=dot(A,A), b2=dot(B,B), c2=dot(C,C), c=[(a2*(B[1]-C[1])+b2*(C[1]-A[1])+c2*(A[1]-B[1]))/d,(a2*(C[0]-B[0])+b2*(A[0]-C[0])+c2*(B[0]-A[0]))/d]; return {c,r:len(sub(A,c))}; }
+function incirc(A,B,C){ const a=len(sub(B,C)), b=len(sub(C,A)), c=len(sub(A,B)), p=a+b+c; if(p<EPS) return null; const ar=Math.abs(crs(sub(B,A),sub(C,A)))/2; if(ar<EPS) return null;
+  return {c:mul(add(add(mul(A,a),mul(B,b)),mul(C,c)),1/p),r:2*ar/p}; }
+// ما تعتمد عليه كل عقدة: 'p'+رقم للنقطة، 'c'+رقم للدائرة
+function engDeps(G,node){ const k=+node.slice(1), out=[];
+  if(node[0]==='p'){ const on=(G.on||{})[k], oc=(G.onc||{})[k], df=(G.def||{})[k];
+    if(df){ ['p','a','b','c','d'].forEach(x=>{ if(df[x]!=null) out.push('p'+df[x]); }); ['ci','cj'].forEach(x=>{ if(df[x]!=null) out.push('c'+df[x]); }); }
+    else if(oc) out.push('c'+oc[0]); else if(on) out.push('p'+on[0],'p'+on[1]); }
+  else { const o=(G.circles||[])[k]; if(!o) return out; if(o.def) ['a','b','c'].forEach(x=>out.push('p'+o.def[x])); else { if(o.cp!=null) out.push('p'+o.cp); if(o.tp!=null) out.push('p'+o.tp); } }
+  return out; }
+// ترتيب الحساب (يُحفظ مؤقتًا حتى تتغير البنية)، والدورات تُكسر بأمان
+function engOrder(G){ const sig=JSON.stringify([G.on,G.onc,G.def,(G.circles||[]).map(o=>[o.cp,o.tp,o.def]),G.pts.length]);
+  if(G.__ord&&G.__ord.sig===sig) return G.__ord;
+  const nodes=[...G.pts.map((_,i)=>'p'+i),...(G.circles||[]).map((_,i)=>'c'+i)], st={}, ord=[], dn={};
+  const visit=n=>{ if(st[n]===2) return; if(st[n]===1) return; st[n]=1; engDeps(G,n).forEach(m=>{ visit(m); (dn[m]||(dn[m]=[])).push(n); }); st[n]=2; ord.push(n); };
+  nodes.forEach(visit); Object.defineProperty(G,'__ord',{value:{sig,ord,dn},enumerable:false,configurable:true,writable:true}); return G.__ord; }
+// العقد التي تتأثر بتغيّر عقدة (هي وما يعتمد عليها)
+function engDown(G,start){ const {dn}=engOrder(G), seen=new Set(start); const st=[...start]; while(st.length){ const n=st.pop(); (dn[n]||[]).forEach(m=>{ if(!seen.has(m)){ seen.add(m); st.push(m); } }); } return seen; }
+function engNode(G,n){ const k=+n.slice(1), P=G.pts, C=G.circles||[];
+  if(n[0]==='c'){ const o=C[k]; if(!o) return; let r=null;
+    if(o.def){ const A=P[o.def.a], B=P[o.def.b], Cc=P[o.def.c]; r=o.def.t==='in'?incirc(A,B,Cc):circ3(A,B,Cc); if(r){ o.c=r.c; o.r=r.r; o.bad=false; } else o.bad=true; return; }
+    if(o.cp!=null&&P[o.cp]) o.c=P[o.cp].slice(); if(o.tp!=null&&P[o.tp]) o.r=Math.max(1,len(sub(P[o.tp],o.c))); return; }
+  const df=(G.def||{})[k], oc=(G.onc||{})[k], on=(G.on||{})[k];
+  if(df){ let q=null, two=null;
+    if(df.t==='mid') q=mid(P[df.a],P[df.b]);
+    else if(df.t==='foot') q=footOn(P[df.p],P[df.a],P[df.b]);
+    else if(df.t==='xll') q=lineX4(P[df.a],P[df.b],P[df.c],P[df.d]);
+    else if(df.t==='xlc') two=C[df.ci]&&lineCirc(P[df.a],P[df.b],C[df.ci]);
+    else if(df.t==='xcc') two=C[df.ci]&&C[df.cj]&&circCirc(C[df.ci],C[df.cj]);
+    else if(df.t==='tan') two=C[df.ci]&&tangentPts(P[df.p],C[df.ci]);
+    else if(df.t==='cen') q=C[df.ci]&&C[df.ci].c.slice();
+    else if(df.t==='tl'){ const o=C[df.ci]; if(o&&P[df.p]){ const r0=sub(P[df.p],o.c); if(len(r0)>EPS) q=add(P[df.p],mul(perp(nrm(r0)),df.l)); } }
+    if(two) q=two[df.s>0?0:1];
+    if(q&&isFinite(q[0])&&isFinite(q[1])){ P[k]=q; df.bad=false; } else df.bad=true; return; }
+  if(oc){ const o=C[oc[0]]; if(o) P[k]=circAt(o,oc[1]); return; }
+  if(on){ const A=P[on[0]], B=P[on[1]]; if(A&&B) P[k]=add(A,mul(sub(B,A),on[2])); } }
+// حساب كل الشكل، أو ما يتبع العقد المتغيرة فقط
+function solve(G,changed){ if(!G||G.kind!=='free') return; const {ord}=engOrder(G), only=changed?engDown(G,changed):null;
+  for(const n of ord){ if(only&&(!only.has(n)||changed.includes(n))) continue; engNode(G,n); } }
+const isDerived=(G,k)=>!!(G.def&&G.def[k]);
 function circPin(G,k,ci){ const o=G.circles[ci], a=ang(sub(G.pts[k],o.c)); (G.onc||(G.onc={}))[k]=[ci,a]; G.pts[k]=circAt(o,a); }
-function circSync(G){ Object.entries(G.onc||{}).forEach(([k,[ci,a]])=>{ const o=(G.circles||[])[ci]; if(o&&G.pts[+k]) G.pts[+k]=circAt(o,a); });
-  Object.entries(G.on||{}).forEach(([j,[a,b,tt]])=>{ if(G.pts[a]&&G.pts[b]) G.pts[+j]=add(G.pts[a],mul(sub(G.pts[b],G.pts[a]),tt)); }); }
+function circSync(G,ci){ solve(G,ci==null?null:['c'+ci]); }
 function circRepin(G){ Object.entries(G.onc||{}).forEach(([k,[ci,a]])=>{ const o=(G.circles||[])[ci]; if(o&&G.pts[+k]) G.onc[k][1]=ang(sub(G.pts[+k],o.c)); }); }
 function nearCirc(G,q){ let best=-1, bd=9; (G.circles||[]).forEach((o,ci)=>{ const d=Math.abs(len(sub(q,o.c))-o.r); if(d<bd){ bd=d; best=ci; } }); return best; }
-function freeDelPoint(G,k){ if(G.onc){ const n={}; Object.entries(G.onc).forEach(([j,v])=>{ j=+j; if(j!==k) n[j>k?j-1:j]=v; }); G.onc=n; } G.sides=G.sides.filter(s=>s.a!==k&&s.b!==k); G.sides.forEach(s=>{ if(s.a>k) s.a--; if(s.b>k) s.b--; });
+// حذف نقطة: العلاقات التي تعتمد عليها تتحول إلى نقاط حرة في مكانها (لا يُحذف شيء آخر بصمت)
+function engDropPoint(G,k){ const f=x=>x>k?x-1:x;
+  const df={}; Object.entries(G.def||{}).forEach(([j,d])=>{ j=+j; if(j===k) return; if(['p','a','b','c','d'].some(x=>d[x]===k)) return; const n={...d}; ['p','a','b','c','d'].forEach(x=>{ if(n[x]!=null) n[x]=f(n[x]); }); df[f(j)]=n; }); G.def=df;
+  if(G.onc){ const n={}; Object.entries(G.onc).forEach(([j,v])=>{ j=+j; if(j!==k) n[f(j)]=v; }); G.onc=n; }
+  (G.circles||[]).forEach(o=>{ if(o.cp===k) delete o.cp; else if(o.cp!=null) o.cp=f(o.cp); if(o.tp===k) delete o.tp; else if(o.tp!=null) o.tp=f(o.tp);
+    if(o.def){ if(['a','b','c'].some(x=>o.def[x]===k)) delete o.def; else ['a','b','c'].forEach(x=>o.def[x]=f(o.def[x])); } }); }
+// حذف دائرة: النقاط المرتبطة بها تبقى في مكانها حرة
+function engDropCircle(G,ci){ const f=x=>x>ci?x-1:x;
+  const n={}; Object.entries(G.onc||{}).forEach(([j,[c,a]])=>{ if(c!==ci) n[j]=[f(c),a]; }); G.onc=n;
+  const df={}; Object.entries(G.def||{}).forEach(([j,d])=>{ if(d.ci===ci||d.cj===ci) return; const m={...d}; if(m.ci!=null) m.ci=f(m.ci); if(m.cj!=null) m.cj=f(m.cj); df[j]=m; }); G.def=df;
+  G.circles.splice(ci,1); }
+function freeDelPoint(G,k){ engDropPoint(G,k); G.sides=G.sides.filter(s=>s.a!==k&&s.b!==k); G.sides.forEach(s=>{ if(s.a>k) s.a--; if(s.b>k) s.b--; });
   const on={}; Object.entries(G.on||{}).forEach(([j,v])=>{ j=+j; if(j===k||v[0]===k||v[1]===k) return; on[j>k?j-1:j]=[v[0]>k?v[0]-1:v[0],v[1]>k?v[1]-1:v[1],v[2]]; }); G.on=on;
   const an={}; Object.entries(G.angs||{}).forEach(([key,A])=>{ const [i,ab]=key.split(':'), [a,b]=ab.split('-').map(Number); if(+i===k||a===k||b===k) return; const f=x=>x>k?x-1:x; an[angKey(f(+i),f(a),f(b))]=A; }); G.angs=an;
   G.pts.splice(k,1); G.verts.splice(k,1); G.n=G.pts.length; }
@@ -694,6 +786,46 @@ function freeTool(t,e){ const G=S.p, h=t.dataset.h, i=+t.dataset.i;
     const k=G.pts.length; G.pts.push(add(A,mul(d,tt))); let nmv=NAMES.find(x=>!G.verts.some(v=>v.name===x))||''; G.verts.push({name:nmv,showName:true}); G.on[k]=[sd.a,sd.b,tt];
     G.sides.splice(i,1,{a:sd.a,b:k,len:'',show:false,ticks:0,par:0,dash:sd.dash},{a:k,b:sd.b,len:'',show:false,ticks:0,par:0,dash:sd.dash}); G.n=G.pts.length; draw(); save(); return; }
   if(FT==='del'){ push(); if(h==='side') G.sides.splice(i,1); else if(h==='vert'&&G.pts.length>2) freeDelPoint(G,i); draw(); save(); syncChips(); return; } }
+/* ---------- أدوات الإنشاء الهندسي (الشكل المركب) ---------- */
+let PICK=[];   // ما اختاره المستخدم حتى الآن لأداة الإنشاء: {h:'vert'|'side'|'circ', i}
+const CONS=[['k_mid','kMid'],['k_perp','kPerp'],['k_inter','kInter'],['k_tan','kTan'],['k_c3','kC3'],['k_cin','kCin'],['k_cen','kCen'],['k_arc','kArc']];
+const newPt=(G,q,show=true)=>{ G.pts.push(q.slice()); G.verts.push({name:NAMES.find(x=>!G.verts.some(v=>v.name===x))||'',showName:show}); G.n=G.pts.length; return G.pts.length-1; };
+const hasSide=(G,a,b)=>G.sides.some(sd=>(sd.a===a&&sd.b===b)||(sd.a===b&&sd.b===a));
+const addSide=(G,a,b,o)=>{ if(a!==b&&!hasSide(G,a,b)) G.sides.push(Object.assign({a,b,len:'',show:false,ticks:0,par:0,dash:false},o||{})); };
+const ptNear=(G,q,tol=1.5)=>G.pts.findIndex(p=>len(sub(p,q))<tol);
+// تقسيم قطعة عند نقطة واقعة عليها (حتى تظهر الزوايا عند النقطة وتعمل علامات كل جزء)
+function splitSide(G,si,k,o){ const sd=G.sides[si], A=G.pts[sd.a], B=G.pts[sd.b], d=sub(B,A), t=dot(sub(G.pts[k],A),d)/(dot(d,d)||1); if(t<=.01||t>=.99) return false;
+  const base={len:'',show:false,ticks:0,par:0,dash:sd.dash,c:sd.c,w:sd.w}; G.sides.splice(si,1,Object.assign({},base,{a:sd.a,b:k},o||{}),Object.assign({},base,{a:k,b:sd.b},o||{})); return true; }
+function sideIndexOf(G,a,b){ return G.sides.findIndex(sd=>(sd.a===a&&sd.b===b)||(sd.a===b&&sd.b===a)); }
+function consMsg(key){ $('hint').textContent=L(key); }
+function consTool(t,e){ const G=S.p, h=t&&t.dataset.h, i=t?+t.dataset.i:-1, need={k_mid:['side'],k_perp:['vert','side'],k_inter:[['side','circ'],['side','circ']],k_tan:['vert','circ'],k_c3:['vert','vert','vert'],k_cin:['vert','vert','vert'],k_cen:['circ'],k_arc:['vert','vert']}[FT];
+  const want=need[PICK.length], ok=Array.isArray(want)?want.includes(h):want===h;
+  if(!ok){ if(PICK.length){ PICK=[]; draw(); } return; }
+  if(PICK.some(p=>p.h===h&&p.i===i)) return; PICK.push({h,i});
+  if(PICK.length<need.length){ draw(); return; }
+  const pk=PICK; PICK=[]; push(); G.def=G.def||{}; G.circles=G.circles||[];
+  if(FT==='k_mid'){ const sd=G.sides[pk[0].i], k=newPt(G,mid(G.pts[sd.a],G.pts[sd.b])); G.def[k]={t:'mid',a:sd.a,b:sd.b}; splitSide(G,pk[0].i,k,{ticks:1}); }
+  else if(FT==='k_perp'){ const p=pk[0].i, sd=G.sides[pk[1].i], a=sd.a, b=sd.b; if(p===a||p===b){ HIST.pop(); return; }
+    const q=footOn(G.pts[p],G.pts[a],G.pts[b]); if(!q){ HIST.pop(); return; } let k=ptNear(G,q);
+    if(k<0){ k=newPt(G,q); G.def[k]={t:'foot',p,a,b}; if(!splitSide(G,pk[1].i,k)){ const e2=len(sub(q,G.pts[a]))<len(sub(q,G.pts[b]))?a:b; addSide(G,e2,k,{dash:true}); } }
+    addSide(G,p,k); const nb=freeNb(G,k).filter(j=>j!==p); if(nb.length){ const key=angKey(k,p,nb[0]); (G.angs[key]=G.angs[key]||{}).right=true; } }
+  else if(FT==='k_inter'){ const [A,B]=pk; const mk2=(q,df)=>{ let k=ptNear(G,q); if(k>=0) return k; k=newPt(G,q); G.def[k]=df; return k; };
+    if(A.h==='side'&&B.h==='side'){ const s1=G.sides[A.i], s2=G.sides[B.i], q=lineX4(G.pts[s1.a],G.pts[s1.b],G.pts[s2.a],G.pts[s2.b]); if(!q){ HIST.pop(); consMsg('kNone'); return; }
+      const k=mk2(q,{t:'xll',a:s1.a,b:s1.b,c:s2.a,d:s2.b}); const j2=sideIndexOf(G,s2.a,s2.b); splitSide(G,sideIndexOf(G,s1.a,s1.b),k); const j3=sideIndexOf(G,s2.a,s2.b); if(j3>=0) splitSide(G,j3,k); }
+    else if(A.h==='circ'&&B.h==='circ'){ const r=circCirc(G.circles[A.i],G.circles[B.i]); if(!r){ HIST.pop(); consMsg('kNone'); return; } r.forEach((q,j)=>mk2(q,{t:'xcc',ci:A.i,cj:B.i,s:j?-1:1})); }
+    else { const S0=A.h==='side'?A:B, C0=A.h==='side'?B:A, sd=G.sides[S0.i], a=sd.a, b=sd.b, r=lineCirc(G.pts[a],G.pts[b],G.circles[C0.i]); if(!r){ HIST.pop(); consMsg('kNone'); return; }
+      r.forEach((q,j)=>{ if(len(sub(q,r[0]))<1&&j) return; const k=mk2(q,{t:'xlc',a,b,ci:C0.i,s:j?-1:1}); const si=sideIndexOf(G,a,b); if(si>=0) splitSide(G,si,k); }); } }
+  else if(FT==='k_tan'){ const p=pk[0].i, ci=pk[1].i, o=G.circles[ci], d=len(sub(G.pts[p],o.c));
+    if(Math.abs(d-o.r)<2){ // نقطة على الدائرة: مماس عندها (قطعة على المماس من الجهتين)
+      const u=perp(nrm(sub(G.pts[p],o.c))), L0=o.r*.9; [1,-1].forEach(sg=>{ const k=newPt(G,add(G.pts[p],mul(u,sg*L0)),false); G.def[k]={t:'tl',p,ci,l:sg*L0}; addSide(G,p,k); }); }
+    else { const r=tangentPts(G.pts[p],o); if(!r){ HIST.pop(); consMsg('kInside'); return; } r.forEach((q,j)=>{ const k=newPt(G,q); G.def[k]={t:'tan',p,ci,s:j?-1:1}; addSide(G,p,k); }); } }
+  else if(FT==='k_c3'||FT==='k_cin'){ const [a,b,c]=pk.map(x=>x.i), r=FT==='k_cin'?incirc(G.pts[a],G.pts[b],G.pts[c]):circ3(G.pts[a],G.pts[b],G.pts[c]); if(!r){ HIST.pop(); consMsg('kCollinear'); return; }
+    const ci=G.circles.push({c:r.c,r:r.r,def:{t:FT==='k_cin'?'in':'3p',a,b,c}})-1; const k=newPt(G,r.c); G.def[k]={t:'cen',ci}; if(FT==='k_cin') G.verts[k].name=G.verts.some(v=>v.name==='I')?G.verts[k].name:(isEn()?'I':G.verts[k].name); }
+  else if(FT==='k_cen'){ const ci=pk[0].i, o=G.circles[ci]; if(G.pts.some((p,j)=>len(sub(p,o.c))<1.5)){ HIST.pop(); return; } const k=newPt(G,o.c); if(o.def) G.def[k]={t:'cen',ci}; else o.cp=k; }
+  else if(FT==='k_arc'){ // تمييز قوس بين نقطتين على الدائرة نفسها (القوس الأصغر، والنقر مرة أخرى يبدّل للأكبر)
+    const [a,b]=pk.map(x=>x.i), ca=(G.onc||{})[a], cb=(G.onc||{})[b], ci=ca&&cb&&ca[0]===cb[0]?ca[0]:(G.circles.findIndex(o=>Math.abs(len(sub(G.pts[a],o.c))-o.r)<2&&Math.abs(len(sub(G.pts[b],o.c))-o.r)<2));
+    if(ci==null||ci<0){ HIST.pop(); consMsg('kArcNeed'); return; } const o=G.circles[ci]; o.arcs=o.arcs||[]; const ex=o.arcs.find(x=>(x.a===a&&x.b===b)||(x.a===b&&x.b===a)); if(ex){ if(ex.big) o.arcs.splice(o.arcs.indexOf(ex),1); else ex.big=true; } else o.arcs.push({a,b,big:false}); }
+  solve(G); draw(); save(); syncChips&&syncChips(); }
 // النقر على خط ضلع داخل منطقة زاوية (ضلع قصير): الضلع أولى من الزاوية
 function sideUnder(t,e){ if(!t||t.dataset.h!=='ang'||S.tab!=='p') return t; const q=svgPt(e), G=S.p, P=G.pts, n=P.length;
   const segs=G.kind==='free'?G.sides.map((sd,i)=>[P[sd.a],P[sd.b],i]):P.map((p,i)=>[p,P[(i+1)%n],i]);
@@ -703,8 +835,10 @@ function sideUnder(t,e){ if(!t||t.dataset.h!=='ang'||S.tab!=='p') return t; cons
 $('fig').addEventListener('pointerdown',e=>{
   if(e.button!==0&&e.pointerType==='mouse') return;   // الزر الأيمن للقائمة فقط
   const t=sideUnder(e.target.closest('[data-h]'),e);
+  if(S.tab==='p'&&S.p.kind==='free'&&FT.startsWith('k_')){ e.preventDefault(); closePop(); consTool(t,e); return; }
   if(S.tab==='p'&&S.p.kind==='free'&&FT==='circ'){ const G=S.p, q=(t&&t.dataset.h==='vert')?G.pts[+t.dataset.i].slice():svgPt(e);   // دائرة: المركز ثم نقطة على المحيط
-    if(!CIRC0){ CIRC0=q; draw(); return; } const r=len(sub(q,CIRC0)); if(r>3){ push(); (G.circles||(G.circles=[])).push({c:CIRC0,r}); } CIRC0=null; draw(); save(); return; }
+    const vi=t&&t.dataset.h==='vert'?+t.dataset.i:null;
+    if(!CIRC0){ CIRC0=q; CIRC0.cp=vi; draw(); return; } const r=len(sub(q,CIRC0)); if(r>3){ push(); const o={c:CIRC0.slice(),r}; if(CIRC0.cp!=null) o.cp=CIRC0.cp; if(vi!=null) o.tp=vi; (G.circles||(G.circles=[])).push(o); } CIRC0=null; draw(); save(); return; }
   // قطعة مستقيمة حرة: نقطتان في أي مكان (أو على نقاط موجودة)، تلتصق بالدائرة القريبة
   if(S.tab==='p'&&S.p.kind==='free'&&FT==='seg'){ const G=S.p; e.preventDefault(); closePop();
     const ptAt=()=>{ if(t&&t.dataset.h==='vert') return +t.dataset.i; const q=svgPt(e), ci=t&&t.dataset.h==='circ'?+t.dataset.i:nearCirc(G,q);
@@ -727,7 +861,12 @@ $('fig').addEventListener('pointermove',e=>{
   const O=JSON.parse(DRAG.st);
   if(DRAG.h==='vert'){ S.p.pts=O.p.pts; setVertex(+DRAG.i,p); }
   else if(DRAG.h==='body'||DRAG.h==='side'||DRAG.h==='ang'){ S.p.pts=O.p.pts.map(q=>add(q,d)); if(O.p.circles) S.p.circles=O.p.circles.map(o=>({...o,c:add(o.c,d)})); }   // تحريك الشكل كله
-  else if(DRAG.h==='circ'){ const o=S.p.circles[+DRAG.i], oo=O.p.circles[+DRAG.i]; if(DRAG.edge) o.r=Math.max(5,len(sub(p,oo.c))); else o.c=add(oo.c,d); if(Object.keys(S.p.onc||{}).length) circSync(S.p); }
+  else if(DRAG.h==='circ'){ const G=S.p, ci=+DRAG.i; G.pts=O.p.pts.map(q=>q.slice()); G.circles=O.p.circles.map(o=>({...o,c:o.c.slice()})); const o=G.circles[ci], oo=O.p.circles[ci];
+    if(o.def){ const ks=['a','b','c'].map(x=>o.def[x]); ks.forEach(k=>{ if(!isDerived(G,k)) G.pts[k]=add(O.p.pts[k],d); }); solve(G,ks.map(k=>'p'+k)); }   // دائرة معرّفة بنقاط: تُنقل نقاطها
+    else { if(DRAG.edge) o.r=Math.max(5,len(sub(p,oo.c))); else o.c=add(oo.c,d);
+      const ch=['c'+ci]; if(o.cp!=null&&!DRAG.edge){ G.pts[o.cp]=o.c.slice(); ch.push('p'+o.cp); }
+      if(o.tp!=null){ G.pts[o.tp]=add(o.c,mul(nrm(sub(O.p.pts[o.tp],oo.c)),o.r)); ch.push('p'+o.tp); }
+      solve(G,ch); } }
   else if(DRAG.h==='cen'){ S.c.c=add(O.c.c,d); }
   else if(DRAG.h==='rad'){ S.c.r=Math.max(20,Math.min(150,len(sub(p,S.c.c)))); }
   else if(DRAG.h==='cp'){ S.c.a[DRAG.i]=Math.round(ang(sub(p,S.c.c))); }
@@ -873,12 +1012,22 @@ const CI={
   sector:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M12 12V3.5A8.5 8.5 0 0 1 20.5 12z" fill="currentColor" fill-opacity=".3"/>'),
   central:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M5 9l7 3 7-3"/>'), inscribed:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M5 9l7 11 7-11"/>'),
   meas:SVI('<path d="M4 20h16M4 20L15 5"/><path d="M11 20a7 7 0 0 0-2-5"/><path d="M17 7.5a1.6 1.6 0 1 0 0.01 0"/>'),
+  k_mid:SVI('<path d="M3 16h18"/><circle cx="12" cy="16" r="2.4" fill="currentColor"/><path d="M7 13v6M17 13v6" stroke-width="1.4"/>'),
+  k_perp:SVI('<path d="M3 19h18M12 19V4"/><path d="M12 15h4v4" stroke-width="1.4"/><circle cx="12" cy="4" r="1.8" fill="currentColor"/>'),
+  k_inter:SVI('<path d="M4 18L20 6M4 6l16 12"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/>'),
+  k_tan:SVI('<circle cx="9" cy="14" r="6"/><path d="M21 5L5 9.5M21 5l-6.5 14"/><circle cx="21" cy="5" r="1.6" fill="currentColor"/>'),
+  k_c3:SVI('<circle cx="12" cy="12" r="8"/><circle cx="5" cy="9" r="1.7" fill="currentColor"/><circle cx="19" cy="9" r="1.7" fill="currentColor"/><circle cx="12" cy="20" r="1.7" fill="currentColor"/>'),
+  k_cin:SVI('<path d="M12 3L2 20h20z"/><circle cx="12" cy="14" r="4.6"/>'),
+  k_cen:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5" stroke-width="1.6"/>'),
+  k_arc:SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M4 9a8.5 8.5 0 0 1 16 0" stroke-width="3.2"/>'),
   dimsC:SVI('<path d="M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3"/>')
 };
 $('segTri').innerHTML=['sca','iso','equ','rt'].map(k=>`<button type="button" data-k="${k}" data-ti="${k}" title="${L(k)}">${CI[k]}</button>`).join('');
 $('segN').innerHTML=[5,6,7,8,9,10].map(n=>`<button type="button" data-k="${n}">${arNum(n)}</button>`).join('');
 $('segFree').innerHTML=[['move','ftMove'],['seg','ftSeg'],['link','ftLink'],['addpt','ftAdd'],['circ','ftCirc']].map(([k,t2])=>`<button type="button" data-k="${k}" data-ti="${t2}" title="${L(t2)}">${CI[k]}</button>`).join('');
-$('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; closePop(); syncUI(); draw(); });
+$('segFree').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=b.dataset.k; LINK=null; PICK=[]; closePop(); syncUI(); draw(); });
+$('segCons').innerHTML=CONS.map(([k,t2])=>`<button type="button" data-k="${k}" data-ti="${t2}" title="${L(t2)}">${CI[k]}</button>`).join('');
+$('segCons').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; FT=FT===b.dataset.k?'move':b.dataset.k; LINK=null; PICK=[]; closePop(); syncUI(); draw(); });
 $('segHid').innerHTML=[['dash','hdash'],['hide','hhide'],['solid','hsolid']].map(([k,t])=>`<button type="button" data-k="${k}" data-ti="${t}" title="${L(t)}">${CI[k]}</button>`).join('');
 
 $('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; push(); S.tab=b.dataset.tab; S.empty=false; closePop(); syncUI(); draw(); save(); });
@@ -958,8 +1107,8 @@ document.addEventListener('pointerdown',e=>{ if(!$('pal').hidden&&!e.target.clos
 
 /* ---------- أزرار المعاينة ---------- */
 $('undoBtn').onclick=undo;
-$('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); (S.p.circles||[]).forEach(o=>{ o.c=rot(o.c,c,-15); }); circRepin(S.p); draw(); save(); };
-$('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); (S.p.circles||[]).forEach(o=>{ o.c=[2*c[0]-o.c[0],o.c[1]]; }); circRepin(S.p); draw(); save(); };
+$('rotBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>rot(p,c,-15)); (S.p.circles||[]).forEach(o=>{ o.c=rot(o.c,c,-15); }); circRepin(S.p); solve(S.p); draw(); save(); };
+$('flipBtn').onclick=()=>{ if(S.tab!=='p') return; push(); const c=cen(S.p.pts); S.p.pts=S.p.pts.map(p=>[2*c[0]-p[0],p[1]]); (S.p.circles||[]).forEach(o=>{ o.c=[2*c[0]-o.c[0],o.c[1]]; }); circRepin(S.p); solve(S.p); draw(); save(); };
 $('clearBtn').onclick=()=>{ push(); closePop(); S.empty=true; setEdit(null); syncUI(); draw(); save(); };
 $('resetBtn').onclick=()=>{ push(); S.empty=false; const d=defaults(); if(S.tab==='p'&&S.p.kind==='free'){ S.p.sides.forEach(s=>Object.assign(s,{len:'',show:false,ticks:0,par:0,dash:false})); S.p.angs={}; } else if(S.tab==='p') S.p=mkPlane(S.p.kind,S.p.sub,S.p.n); else if(S.tab==='c') S.c=d.c; else { S.s.size[S.s.kind]=d.s.size[S.s.kind]; S.s.lab[S.s.kind]=d.s.lab[S.s.kind]; if(S.s.ax) delete S.s.ax[S.s.kind]; if(S.s.rot) delete S.s.rot[S.s.kind]; }
   closePop(); syncUI(); draw(); save(); };
@@ -1020,7 +1169,7 @@ $('ctx').addEventListener('click',e=>{ const b=e.target.closest('[data-x]'); if(
 document.addEventListener('pointerdown',e=>{ if(!$('ctx').hidden&&!e.target.closest('#ctx')) ctxClose(); },true);
 addEventListener('blur',ctxClose); addEventListener('resize',ctxClose); document.addEventListener('scroll',ctxClose,true);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') ctxClose(); });
-document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspace')&&SEL&&SEL.k==='circ'&&!(e.target&&e.target.closest&&e.target.closest('input'))){ e.preventDefault(); push(); { const ci=SEL.i, n={}; Object.entries(S.p.onc||{}).forEach(([j,[c,a]])=>{ if(c!==ci) n[j]=[c>ci?c-1:c,a]; }); S.p.onc=n; } S.p.circles.splice(SEL.i,1); SEL=null; draw(); save(); return; }
+document.addEventListener('keydown',e=>{ if((e.key==='Delete'||e.key==='Backspace')&&SEL&&SEL.k==='circ'&&!(e.target&&e.target.closest&&e.target.closest('input'))){ e.preventDefault(); push(); engDropCircle(S.p,SEL.i); SEL=null; draw(); save(); return; }
   if((e.key==='Delete'||e.key==='Backspace')&&SEL&&!$('pop').hidden&&(SEL.k==='side'||SEL.k==='vert')){ const t=e.target, inInp=t&&t.closest&&t.closest('input');
     if(!inInp||t.dataset.fresh){ e.preventDefault(); delObj(SEL.k,SEL.i); return; } } });
 document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('input')){ e.preventDefault(); undo(); } if(e.key==='Escape'){ closePop(); $('pal').hidden=true; } });
@@ -1035,11 +1184,11 @@ function syncUI(){ setScript(); { const en=isEn(); setP($('scAr'),!en); setP($('
   document.querySelectorAll('#galS button').forEach(b=>setP(b,b.dataset.k===S.s.kind));
   $('optTri').hidden=!(tab==='p'&&S.p.kind==='tri'); document.querySelectorAll('#segTri button').forEach(b=>setP(b,b.dataset.k===S.p.sub));
   $('optN').hidden=!(tab==='p'&&S.p.kind==='poly');
-  $('optFree').hidden=!(tab==='p'&&S.p.kind==='free'); document.querySelectorAll('#segFree button').forEach(b=>setP(b,b.dataset.k===FT)); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
+  $('optFree').hidden=!(tab==='p'&&S.p.kind==='free'); document.querySelectorAll('#segFree button').forEach(b=>setP(b,b.dataset.k===FT)); $('optCons').hidden=$('optFree').hidden; document.querySelectorAll('#segCons button').forEach(b=>setP(b,b.dataset.k===FT)); document.querySelectorAll('#segN button').forEach(b=>setP(b,+b.dataset.k===S.p.pts.length));
   $('optHid').hidden=tab!=='s'; document.querySelectorAll('#segHid button').forEach(b=>setP(b,b.dataset.k===S.s.hidden));
   $('rotBtn').disabled=$('flipBtn').disabled=tab!=='p'||!!S.empty; $('clearBtn').disabled=!!S.empty;
   // الشرح يظهر فقط حين يغيّر طريقة النقر (أدوات الشكل المركب)، والباقي في التلميحات
-  $('hint').textContent=(tab==='p'&&S.p.kind==='free'&&FT!=='move')?L(FT==='seg'?'hintSeg':FT==='link'?'hintLink':FT==='addpt'?'hintAdd':'hintDel'):'';
+  $('hint').textContent=(tab==='p'&&S.p.kind==='free'&&FT!=='move')?L(FT.startsWith('k_')?'h'+FT.slice(2):FT==='seg'?'hintSeg':FT==='link'?'hintLink':FT==='addpt'?'hintAdd':'hintDel'):'';
   $('wSel').value=S.look.w; $('fsSel').value=S.look.fs; setP($('dSolid'),!S.look.dash); setP($('dDash'),S.look.dash);
   $('ptSel').value=S.look.ptR; setP($('ptShow'),S.look.ptShow); setP($('ptFull'),S.look.ptFill); setP($('ptHollow'),!S.look.ptFill); setP($('nmText'),S.look.names!=='sym'); setP($('dgAr'),S.look.digits!=='en'); setP($('dgEn'),S.look.digits==='en'); setP($('nmSym'),S.look.names==='sym');
   paintColors(); syncChips(); syncDims();
