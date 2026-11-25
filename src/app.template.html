@@ -157,7 +157,7 @@ footer{text-align:center;font-size:11.5px;color:var(--muted);direction:ltr}
       <div class="menu" id="appMenu" role="menu" hidden>
         <button type="button" role="menuitem" id="loadSelItem" data-act="edit" data-i="loadSel">تعديل الشكل المحدد</button>
         <button type="button" role="menuitem" id="fromPicItem" data-act="pic" data-i="fromPic">تحويل الصورة المحددة إلى شكل</button>
-        <button type="button" role="menuitem" id="snapItem"><span data-i="snap">الالتصاق بالدوائر</span> <b id="snapMark">✓</b></button>
+        <button type="button" role="menuitem" id="snapItem"><span data-i="snap">الالتصاق</span> <b id="snapMark">✓</b></button>
         <button type="button" role="menuitem" id="chkUpd" data-i="chkUpd">التحقق من التحديثات</button>
         <button type="button" role="menuitem" id="langItem">English</button>
         <button type="button" role="menuitem" id="aboutBtn" data-i="about">حول الأداة</button>
@@ -282,7 +282,7 @@ const T={
   kCin:['الدائرة الداخلية لمثلث','Incircle of a triangle'], hcin:['انقر رؤوس المثلث الثلاثة: تُرسم دائرته الداخلية ومركزها.','Click the three vertices: its incircle and center are drawn.'],
   kCen:['مركز الدائرة','Circle center'], hcen:['انقر دائرة لإضافة مركزها كنقطة (سحب المركز يحرك الدائرة).','Click a circle to add its center as a point (dragging it moves the circle).'],
   kEq:['وتر مساوٍ لوتر','Equal chord'], heq:['انقر وترًا ثم نقطة على الدائرة نفسها: يُرسم منها وتر مساوٍ له يبقى مساويًا عند السحب.','Click a chord, then a point on the same circle: an equal chord is drawn from it and stays equal when dragging.'], kEqNeed:['الوتر والنقطة يجب أن يكونا على الدائرة نفسها.','The chord and the point must be on the same circle.'],
-  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق بالدوائر','Snap to circles'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
+  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], sec:['مقطع موازٍ للقاعدة (اسحب مقبضه لتغيير ارتفاعه)','Section parallel to the base (drag its handle to change its height)'], degIns:['رمز الدرجة °','Degree sign °'], snap:['الالتصاق (بالدوائر وبالزوايا 90° و180°)','Snapping (to circles and to 90° / 180° angles)'], snapOn:['الالتصاق مفعّل','Snapping on'], snapOff:['الالتصاق معطّل','Snapping off'], mselN:['محدد: % نقاط (اسحب إحداها لتحريكها معًا، أو احذفها)','Selected: % points (drag one to move them together, or delete)'],
   recent:['الأخيرة','Recent'], favs:['المفضلة','Favorites'], favT:['حفظ الشكل الحالي في المفضلة (أو إزالته)','Save the current figure to favorites (or remove it)'], favAdd:['حُفظ في المفضلة','Saved to favorites'], favDel:['أُزيل من المفضلة','Removed from favorites'],
   lockLen:['تثبيت الطول (الطول المكتوب يضبط الرسم)','Fix the length (a typed length sets the drawing)'], lockAng:['تثبيت القياس (القياس المكتوب يضبط الرسم)','Fix the measure (a typed measure sets the drawing)'], pinPt:['تثبيت النقطة','Pin the point'], lockNo:['لا يمكن التثبيت: طرفا العنصر مقيدان بعلاقة أخرى.','Cannot fix: both ends already have another relation.'], kPar:['مستقيم موازٍ','Parallel line'], hpar:['انقر قطعة ثم نقطة: يُرسم منها مستقيم موازٍ (ومن نقطة على الدائرة وتر موازٍ).','Click a segment, then a point: a parallel line is drawn from it (a parallel chord from a point on the circle).'],
   kArc:['تمييز قوس','Highlight an arc'], arcW:['القوس','Arc'], arcLab:['قياس القوس أو تعبير (مثل 80° أو 2x+1)','Arc measure or expression (e.g. 80° or 2x+1)'], arcBig:['القوس الأكبر','Major arc'], arcTicks:['علامات تساوي الأقواس','Equal-arc marks'], arcHl:['تلوين القوس (أطفئه لتبقى العلامات فقط)','Highlight the arc (turn off to keep only the marks)'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر. ثم انقر القوس لكتابة قياسه أو وضع علامات التساوي عليه.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
@@ -763,7 +763,7 @@ function setVertex(i,p){
     if(G.lk&&G.lk[i]){ G.lk[i].ang=ang(sub(p,P[G.lk[i].a])); solve(G,null); return; }   // طول مثبت: النقطة تدور حول الطرف الآخر
     const oc=G.onc&&G.onc[i]&&(G.circles||[])[G.onc[i][0]];
     if(oc){ G.onc[i][1]=ang(sub(p,oc.c)); P[i]=circAt(oc,G.onc[i][1]); }
-    else if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=p;
+    else if(on[i]){ const [a,b]=on[i], A=P[a], B=P[b], d=sub(B,A), tt=Math.max(.03,Math.min(.97,dot(sub(p,A),d)/(dot(d,d)||1))); on[i][2]=tt; P[i]=add(A,mul(d,tt)); } else P[i]=angSnap(G,i,p);
     solve(G,['p'+i]); return; }
   if(k==='tri'){
     if(G.sub==='sca') P[i]=p;
@@ -881,6 +881,21 @@ function circPin(G,k,ci){ const o=G.circles[ci], a=ang(sub(G.pts[k],o.c)); (G.on
 function circSync(G,ci){ solve(G,ci==null?null:['c'+ci]); }
 function circRepin(G){ Object.entries(G.onc||{}).forEach(([k,[ci,a]])=>{ const o=(G.circles||[])[ci]; if(o&&G.pts[+k]) G.onc[k][1]=ang(sub(G.pts[+k],o.c)); }); }
 let SNAP=true; try{ SNAP=localStorage.getItem('uula-geometry-snap')!=='0'; }catch(e){}
+// التقاط الزوايا عند السحب: إذا قاربت الزاوية بين قطعتين 180° أو 90° (بفارق 1.5° أو أقل) تصبح كذلك تمامًا
+const SNAP_DEG=1.5;
+function angSnap(G,i,p){ if(!SNAP) return p; const P=G.pts, nb=freeNb(G,i); let best=null;
+  const consider=(q,err)=>{ if(err<=SNAP_DEG&&(!best||err<best.err)) best={q,err}; };
+  const rotv=(v,deg)=>{ const t=rad(deg); return [v[0]*Math.cos(t)-v[1]*Math.sin(t),v[0]*Math.sin(t)+v[1]*Math.cos(t)]; };
+  // 1) النقطة المسحوبة طرف قطعة VP: الزاوية عند V بين VP وقطعة أخرى VW
+  nb.forEach(v=>{ const V=P[v], d=len(sub(p,V)); if(d<4) return; freeNb(G,v).forEach(w=>{ if(w===i) return; const u=sub(P[w],V); if(len(u)<1e-6) return;
+    const a=Math.atan2(crs(u,sub(p,V)),dot(u,sub(p,V)))*180/Math.PI;   // من -180 إلى 180
+    [180,-180,90,-90].forEach(t=>{ const err=Math.abs(a-t); if(err<=SNAP_DEG) consider(add(V,mul(rotv(nrm(u),t),d)),err); }); }); });
+  // 2) النقطة المسحوبة رأس بين قطعتين AP و PC: على استقامة واحدة (على المستقيم AC) أو قائمة (على الدائرة التي قطرها AC)
+  for(let x=0;x<nb.length;x++) for(let y=x+1;y<nb.length;y++){ const A=P[nb[x]], C=P[nb[y]], u=sub(A,p), w=sub(C,p); if(len(u)<4||len(w)<4) continue;
+    const a=Math.abs(Math.atan2(crs(u,w),dot(u,w))*180/Math.PI);
+    if(180-a<=SNAP_DEG){ const f=footOn(p,A,C); if(f) consider(f,180-a); }
+    if(Math.abs(a-90)<=SNAP_DEG){ const m=mid(A,C), r=len(sub(C,A))/2, dv=sub(p,m); if(len(dv)>1e-6) consider(add(m,mul(nrm(dv),r)),Math.abs(a-90)); } }
+  return best?best.q:p; }
 function nearCirc(G,q){ if(!SNAP) return -1; let best=-1, bd=9; (G.circles||[]).forEach((o,ci)=>{ const d=Math.abs(len(sub(q,o.c))-o.r); if(d<bd){ bd=d; best=ci; } }); return best; }
 // حذف نقطة: العلاقات التي تعتمد عليها تتحول إلى نقاط حرة في مكانها (لا يُحذف شيء آخر بصمت)
 function engDropPoint(G,k){ const f=x=>x>k?x-1:x;

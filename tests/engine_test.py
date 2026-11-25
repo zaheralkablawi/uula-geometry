@@ -139,6 +139,20 @@ async def main():
     l0=d(g['pts'][tls[0]],T); await drag(tls[0],[g['pts'][tls[0]][0]*1.0+40*(g['pts'][tls[0]][0]-T[0])/l0, g['pts'][tls[0]][1]+40*(g['pts'][tls[0]][1]-T[1])/l0])
     g=await G(); l1=d(g['pts'][tls[0]],T)
     check('tangent end drag changes its length', abs(l1-(l0+40))<2 and abs(dotp(sub(g['pts'][tls[0]],T),sub(T,O)))<1e-6*d(T,O)*l1, [l0,l1])
+    # 13) التقاط الزوايا: 179.2° تصبح 180°، و89.4° تصبح 90°، و177° تبقى؛ والرأس بين قطعتين
+    import math as mm
+    def angle_at(P,v,a,b):
+      u=sub(P[a],P[v]); w=sub(P[b],P[v]); return abs(mm.degrees(mm.atan2(u[0]*w[1]-u[1]*w[0],u[0]*w[0]+u[1]*w[1])))
+    await setup("S.p=mkFree([[60,160],[160,160],[260,160]],[[0,1],[1,2]]); SNAP=true")
+    for deg,exp,name in ((179.2,180,'179.2 -> 180'),(89.4,90,'89.4 -> 90'),(177,177,'177 stays')):
+      t=mm.radians(180-deg); to=[160+100*mm.cos(t), 160-100*mm.sin(t)]
+      await E("(()=>{ setVertex(2,%s); })()"%json.dumps(to)); g=await G()
+      check('angle snap '+name, abs(angle_at(g['pts'],1,0,2)-exp)<1e-6, angle_at(g['pts'],1,0,2))
+    await E("(()=>{ setVertex(2,[260,160]); setVertex(1,[160,161.2]); })()"); g=await G()
+    check('vertex between two segments snaps to straight', abs(angle_at(g['pts'],1,0,2)-180)<1e-6, g['pts'][1])
+    await E("(()=>{ SNAP=false; setVertex(1,[160,161.2]); })()"); g=await G()
+    check('no snapping when snapping is off', abs(angle_at(g['pts'],1,0,2)-180)>0.5)
+    await E("SNAP=true")
     check('no page errors', not errs, errs)
     await b.close()
   print('\n%d failures'%len(FAIL)); sys.exit(1 if FAIL else 0)
