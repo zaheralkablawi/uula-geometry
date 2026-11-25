@@ -295,7 +295,7 @@ const T={
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wR2:['نصف قطر القاعدة الصغرى','Small radius'], wS:['الراسم','Slant'],
   inserting:['جارٍ الإدراج…','Inserting…'], inserted:['تم الإدراج','Inserted'], updated:['تم التحديث','Updated'], asPic:['أُدرج صورةً (إصدار Office لا يدعم الأشكال القابلة للتعديل)','Inserted as a picture (this Office version can\'t insert editable shapes)'],
   insFail:['تعذّر الإدراج','Could not insert'], noHost:['افتح الأداة من PowerPoint أو Word للإدراج','Open the tool in PowerPoint or Word to insert'],
-  selFirst:['حدّد الشكل أولاً','Select the shape first'], notOurs:['هذا ليس شكلاً من الأداة','This is not a Geometry shape'], loaded:['عدّل ثم اضغط «تحديث»','Edit, then click Update'], loadedManual:['هذا الشكل عُدّل يدويًا في باوربوينت. عند «تحديث» يُرسم من جديد، وتُحفظ النسخة المعدّلة يدويًا خارج الشريحة على اليسار.','This shape was edited manually in PowerPoint. On Update it is redrawn, and the manually edited copy is kept off the slide on the left.'],
+  selFirst:['حدّد الشكل أولاً','Select the shape first'], notOurs:['هذا ليس شكلاً من الأداة','This is not a Geometry shape'], loaded:['عدّل ثم اضغط «تحديث»','Edit, then click Update'], loadedManual:['حُذفت عناصر من هذا الشكل أو أُضيفت إليه في باوربوينت. عند «تحديث» يُرسم من جديد، وتُحفظ النسخة المعدّلة يدويًا خارج الشريحة على اليسار.','This shape was edited manually in PowerPoint. On Update it is redrawn, and the manually edited copy is kept off the slide on the left.'],
   latest:['لديك آخر إصدار','You have the latest version'], hasUpd:['يوجد تحديث','An update is available'], noConn:['تعذّر الاتصال','Could not connect'],
   aboutB:['ترسم الأشكال الهندسية المستوية والدائرة والمجسمات، مع تسمية الرؤوس والأطوال والزوايا وعلامات التساوي والتوازي، وتُدرجها في الباوربوينت أشكالاً قابلة للتعديل، وفي الوورد صورةً.','Draws plane shapes, circles and solids with vertex names, lengths, angles and equal/parallel marks. Inserts editable shapes in PowerPoint and a picture in Word.']
 };
@@ -1480,10 +1480,10 @@ async function loadSelected(quiet){
     if(HOST==='PowerPoint'){ await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width'); await ctx.sync();
         if(!ss.items.length) throw L('selFirst'); const s=ss.items[0], t=s.tags.getItemOrNullObject(TAG); t.load('value'); await ctx.sync();
         if(t.isNullObject) throw L('notOurs'); data=JSON.parse(t.value); ed={id:s.id,left:s.left,top:s.top,width:s.width,w:data.w};
-        // كشف التعديل اليدوي داخل باوربوينت: عدد العناصر أو نسبة الأبعاد تغيّرت منذ الإدراج
+        // كشف التعديل اليدوي داخل باوربوينت: عدد العناصر تغيّر منذ الإدراج (حذف أو إضافة)
         if(data.n||data.h){ let cnt=null; try{ const gs=s.group.shapes; gs.load('items/id'); s.load('height'); await ctx.sync(); cnt=gs.items.length; }catch(e){ try{ s.load('height'); await ctx.sync(); }catch(e2){} }
-          const ratio0=data.h?data.w/data.h:null, ratio1=s.height?s.width/s.height:null;
-          ed.manual=(data.n&&cnt!=null&&cnt!==data.n)||(ratio0&&ratio1&&Math.abs(ratio1/ratio0-1)>.03); } }); }
+          // عدد العناصر فقط: أبعاد المجموعة في باوربوينت تختلف عن تقديرنا، وتغيير الحجم يُحفظ عند التحديث أصلًا
+          ed.manual=!!(data.n&&cnt!=null&&cnt!==data.n); } }); }
     else { await Word.run(async ctx=>{ const pics=ctx.document.getSelection().inlinePictures; pics.load('items/altTextTitle,items/altTextDescription'); await ctx.sync();
         if(!pics.items.length) throw L('selFirst'); const p=pics.items[0]; if(p.altTextTitle!==TITLE) throw L('notOurs'); data=JSON.parse(p.altTextDescription); ed={word:true}; }); }
     if(quiet&&EDIT&&EDIT.id===ed.id) return true;
