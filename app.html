@@ -277,7 +277,7 @@ const T={
   kCin:['الدائرة الداخلية لمثلث','Incircle of a triangle'], hcin:['انقر رؤوس المثلث الثلاثة: تُرسم دائرته الداخلية ومركزها.','Click the three vertices: its incircle and center are drawn.'],
   kCen:['مركز الدائرة','Circle center'], hcen:['انقر دائرة لإضافة مركزها كنقطة (سحب المركز يحرك الدائرة).','Click a circle to add its center as a point (dragging it moves the circle).'],
   kEq:['وتر مساوٍ لوتر','Equal chord'], heq:['انقر وترًا ثم نقطة على الدائرة نفسها: يُرسم منها وتر مساوٍ له يبقى مساويًا عند السحب.','Click a chord, then a point on the same circle: an equal chord is drawn from it and stays equal when dragging.'], kEqNeed:['الوتر والنقطة يجب أن يكونا على الدائرة نفسها.','The chord and the point must be on the same circle.'],
-  kPar:['مستقيم موازٍ','Parallel line'], hpar:['انقر قطعة ثم نقطة: يُرسم منها مستقيم موازٍ (ومن نقطة على الدائرة وتر موازٍ).','Click a segment, then a point: a parallel line is drawn from it (a parallel chord from a point on the circle).'],
+  diag3:['القطر الفراغي وقطر القاعدة','Space diagonal and base diagonal'], kPar:['مستقيم موازٍ','Parallel line'], hpar:['انقر قطعة ثم نقطة: يُرسم منها مستقيم موازٍ (ومن نقطة على الدائرة وتر موازٍ).','Click a segment, then a point: a parallel line is drawn from it (a parallel chord from a point on the circle).'],
   kArc:['تمييز قوس','Highlight an arc'], arcW:['القوس','Arc'], arcLab:['قياس القوس أو تعبير (مثل 80° أو 2x+1)','Arc measure or expression (e.g. 80° or 2x+1)'], arcBig:['القوس الأكبر','Major arc'], harc:['انقر نقطتين على الدائرة: يُميَّز القوس الأصغر، وتكرار ذلك يحوّله للأكبر ثم يزيله.','Click two points on the circle: the minor arc is highlighted; repeating switches to the major arc, then removes it.'],
   kNone:['لا يوجد تقاطع.','No intersection.'], kInside:['النقطة داخل الدائرة: لا يمكن رسم مماس منها.','The point is inside the circle: no tangent from it.'], kCollinear:['النقاط على استقامة واحدة.','The points are collinear.'], kArcNeed:['النقطتان يجب أن تكونا على الدائرة نفسها.','Both points must be on the same circle.'],
   ftSeg:['قطعة مستقيمة: انقر بدايتها ثم نهايتها في أي مكان','Segment: click its start, then its end, anywhere'], hintSeg:['انقر بداية القطعة ثم نهايتها (في أي مكان أو على نقطة موجودة).','Click the start of the segment, then its end (anywhere or on an existing point).'],
@@ -571,6 +571,8 @@ function buildSolid(){
     if(LK().fill){ F.forEach((f,fi)=>{ if(vis[fi]) PR.push({t:'poly',pts:f.map(i=>P2[i].slice()),fill:LK().fill}); }); }
     E.forEach((v,key)=>{ const [a,b]=key.split('-').map(Number); if(v) seg(P2[a],P2[b]); else if(hid!=='hide') seg(P2[a],P2[b],hidOpt()); });
     const C2=cen(P2);
+    // القطر الفراغي للمكعب ومتوازي المستطيلات (ومعه قطر القاعدة)، بخط مساعد
+    if(Z.diag3&&(k==='cube'||k==='box')){ aux(P2[0],P2[6]); aux(P2[0],P2[2]); rightMark(P2[2],P2[0],P2[6],7); }
     P2.forEach(p=>ptP(p));
     if(Z.names) P2.forEach((p,i)=>{ const dd=nrm(sub(p,C2)); lab2(p,add(p,mul(dd,fs*.95)),'s:'+k+':'+i,NAMES[i]); });
     if(Z.dims){
@@ -1147,6 +1149,7 @@ const CI={
   k_cin:SVI('<path d="M12 3L2 20h20z"/><circle cx="12" cy="14" r="4.6"/>'),
   k_cen:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5" stroke-width="1.6"/>'),
   k_eq:SVI('<circle cx="12" cy="12" r="8.5"/><path d="M5 8.5h14M5 15.5h14"/><path d="M11 6.5v4M13 6.5v4M11 13.5v4M13 13.5v4" stroke-width="1.3"/>'),
+  diag3:SVI('<path d="M4 8h11v11H4zM4 8l5-4h11v11l-5 4M15 8l5-4"/><path d="M4 19L20 4" stroke-dasharray="2.4 1.8"/>'),
   k_par:SVI('<path d="M3 9L17 4M7 20l14-5"/><path d="M9 5.5l2 1.3-1.7 1.6M13 16.5l2 1.3-1.7 1.6" stroke-width="1.4"/>'),
   k_arc:SVI('<circle cx="12" cy="12" r="8.5" stroke-width="1"/><path d="M4 9a8.5 8.5 0 0 1 16 0" stroke-width="3.2"/>'),
   dimsC:SVI('<path d="M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3"/>')
@@ -1186,7 +1189,7 @@ function chipList(){
     if(n===4){ c.push(['diag',G.diag]); if(G.kind==='para'||G.kind==='trap'||G.kind==='rect'||G.kind==='sq') c.push(['alt',V[0].alt]); }
     return c; }
   if(S.tab==='c'){ const sh=S.c.show; return ['center','radius','diam','chord','tangent','arc','sector','central','inscribed','pnames','meas'].map(k=>[k,k==='pnames'?sh.names:sh[k]]); }
-  const Z=S.s, poly=POLY3.includes(Z.kind); const c=[]; if(poly) c.push(['names',Z.names]); c.push(['dimsC',Z.dims]); if(!poly) c.push(['centers',Z.centers]); return c;
+  const Z=S.s, poly=POLY3.includes(Z.kind); const c=[]; if(poly) c.push(['names',Z.names]); if(Z.kind==='cube'||Z.kind==='box') c.push(['diag3',!!Z.diag3]); c.push(['dimsC',Z.dims]); if(!poly) c.push(['centers',Z.centers]); return c;
 }
 function syncChips(){ $('chips').innerHTML=chipList().map(([k,on])=>`<button type="button" class="q" data-k="${k}" aria-pressed="${!!on}" title="${esc(L(k))}" aria-label="${esc(L(k))}">${CI[k]||esc(L(k))}</button>`).join(''); }
 $('chips').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(!b) return; push(); const k=b.dataset.k, on=b.getAttribute('aria-pressed')!=='true';
@@ -1194,7 +1197,7 @@ $('chips').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); i
     if(k==='names') G.verts.forEach(v=>v.showName=on); else if(k==='lens') G.sides.forEach(s=>s.show=on); else if(k==='angs') G.verts.forEach(v=>v.showAng=on); else if(k==='arcsAll') G.verts.forEach(v=>v.arc=on);
     else if(k==='diag') G.diag=on; else G.verts[0][k]=on; }
   else if(S.tab==='c'){ if(k==='pnames') S.c.show.names=on; else S.c.show[k]=on; }
-  else { if(k==='names') S.s.names=on; else if(k==='dimsC') S.s.dims=on; else S.s.centers=on; }
+  else { if(k==='names') S.s.names=on; else if(k==='dimsC') S.s.dims=on; else if(k==='diag3') S.s.diag3=on; else S.s.centers=on; }
   syncChips(); syncDims(); draw(); save(); });
 const DIMK={cube:[['w','wE']],box:[['w','wL'],['d','wW'],['h','wH']],prism:[['w','wL'],['h','wH'],['d','wW']],pyr:[['w','wE'],['h','wH']],cyl:[['r','wR'],['h','wH']],cone:[['r','wR'],['h','wH'],['l','wS']],sph:[['r','wR']],nprism:[['w','wE'],['h','wH']],npyr:[['w','wE'],['h','wH']],frust:[['w','wE'],['h','wH']],hemi:[['r','wR']],fcone:[['r','wR'],['r2','wR2'],['h','wH']]};
 function syncDims(){ const d=$('dims'); if(S.tab!=='s'||!S.s.dims){ d.innerHTML=''; d.hidden=true; return; } d.hidden=false; const k=S.s.kind;
