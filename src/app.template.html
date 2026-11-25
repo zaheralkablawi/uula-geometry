@@ -298,7 +298,7 @@ const T={
   typeName:['اكتب الاسم…','Type the name…'], typeLen:['اكتب الطول…','Type the length…'],
   dotted:['منقط','Dotted'], defColor:['اللون الافتراضي','Default color'],
   deleted:['حُذف. للتراجع اضغط زر التراجع','Deleted. Press Undo to bring it back'], delSel:['حذف (Delete)','Delete (Delete key)'],
-  side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['رمز التوازي //','Parallel //'], dashed:['متقطع','Dashed'],
+  side:['الضلع','Side'], vertex:['الرأس','Vertex'], showLen:['إظهار الطول','Show length'], showAng:['إظهار القياس','Show measure'], ticks:['شرطات التساوي','Equal marks'], par:['علامة التوازي: سهم أو سهمان في منتصف القطعة','Parallel mark: one or two arrowheads in the middle of the segment'], dashed:['متقطع','Dashed'],
   vname:['اسم الرأس','Vertex name'], rightM:['علامة الزاوية القائمة','Right-angle mark'], arcs:['أقواس تساوي الزوايا','Equal-angle arcs'], fromV:['من هذا الرأس','From this vertex'],
   wL:['الطول','Length'], wW:['العرض','Width'], wH:['الارتفاع','Height'], wE:['الحرف','Edge'], wR:['نصف القطر','Radius'], wR2:['نصف قطر القاعدة الصغرى','Small radius'], wS:['الراسم','Slant'],
   inserting:['جارٍ الإدراج…','Inserting…'], inserted:['تم الإدراج','Inserted'], updated:['تم التحديث','Updated'], asPic:['أُدرج صورةً (إصدار Office لا يدعم الأشكال القابلة للتعديل)','Inserted as a picture (this Office version can\'t insert editable shapes)'],
@@ -431,8 +431,9 @@ function rightMark(P,A,B,s){ s=s||11; const u=mul(nrm(sub(A,P)),s), v=mul(nrm(su
 function sideTicks(a,b,k,shift){ if(!k) return; const d=nrm(sub(b,a)), n=perp(d), m=add(mid(a,b),mul(d,shift||0)), h=6;
   for(let i=0;i<k;i++){ const o=add(m,mul(d,(i-(k-1)/2)*4.5)); mk(add(o,mul(n,h)),sub(o,mul(n,h))); } }
 function parMarks(a,b,k,shift){ if(!k) return; let d=nrm(sub(b,a)); if(d[0]<0||(Math.abs(d[0])<1e-6&&d[1]>0)) d=mul(d,-1);
-  const m=add(mid(a,b),mul(d,shift||0)), cnt=k+1, s=rot(d,[0,0],-60), h=6.5;   // شكل // مائل
-  for(let i=0;i<cnt;i++){ const o=add(m,mul(d,(i-(cnt-1)/2)*5)); mk(add(o,mul(s,h)),sub(o,mul(s,h))); } }
+  // سهم أو سهمان (>، >>) في منتصف القطعة، وكل القطع المتوازية تشير إلى الجهة نفسها
+  const m=add(mid(a,b),mul(d,shift||0)), nv=perp(d), h=4.2, gap=4.5;
+  for(let i=0;i<k;i++){ const o=add(m,mul(d,(i-(k-1)/2)*gap)), tip=add(o,mul(d,h*.6)), back=sub(o,mul(d,h*.6)); mk(add(back,mul(nv,h)),tip); mk(sub(back,mul(nv,h)),tip); } }
 function outward(P,i){ const n=P.length, a=P[(i-1+n)%n], b=P[(i+1)%n], u=nrm(sub(a,P[i])), v=nrm(sub(b,P[i])); let d=mul(add(u,v),-1); if(len(d)<1e-3) d=sub(P[i],cen(P)); return nrm(d); }
 
 /* ---------- الأشكال المستوية ---------- */
@@ -1105,8 +1106,8 @@ $('fig').addEventListener('pointerup',endDrag); $('fig').addEventListener('point
 const ICO={ cw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M4 20L15 6"/><path d="M15 20a11 11 0 0 0-4.5-8.8"/><path d="M13.2 17.4L15 20l2.4-1.8"/></svg>', ccw:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M4 20L15 6"/><path d="M15 20a11 11 0 0 0-4.5-8.8"/><path d="M8 12.6l2.5-1.4.6 2.9"/></svg>', ae:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h17"/><path d="M15 7l5 5-5 5"/></svg>', as:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h17"/><path d="M9 7l-5 5 5 5"/></svg>', star:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M6 8.5l12 7M18 8.5l-12 7"/></svg>', dotI:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg>', t1:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14"/></svg>',
   t2:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M9 5v14M15 5v14"/></svg>',
   t3:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M6 5v14M12 5v14M18 5v14"/></svg>',
-  p1:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M6 19L11 5M13 19L18 5"/></svg>',
-  p2:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M3 19L8 5M10 19L15 5M17 19L22 5"/></svg>',
+  p1:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l7 7-7 7"/></svg>',
+  p2:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l7 7-7 7M12 5l7 7-7 7"/></svg>',
   dash:'<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.5"><path d="M2 12h20"/></svg>',
   len:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 8v8M21 8v8"/></svg>',
   ang:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M4 19L16 5"/><path d="M11 19a7 7 0 0 0-2-5"/></svg>',
