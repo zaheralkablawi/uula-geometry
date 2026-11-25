@@ -2169,6 +2169,9 @@ async function pictureToShape(src,ed){
   msg(ed&&!ed.word?L('picDone'):L('picDoneW'),'good');
   return r;
 }
+// أشكال Geometry التي حُوِّلت من صورة أخرى (وسم UULA_GEO_FROM): لا يحل محلها تحويل هذه الصورة
+async function otherOwned(ctx,sh,picId){ const out=new Set(); try{ const L0=sh.items.filter(x=>x.name===TITLE).map(x=>({x,t:x.tags.getItemOrNullObject('UULA_GEO_FROM')})); L0.forEach(o=>o.t.load('value')); await ctx.sync();
+  L0.forEach(o=>{ if(!o.t.isNullObject&&o.t.value!==String(picId)) out.add(o.x.id); }); }catch(e){ console.error(e); } return out; }
 async function selectedPicture(){
   if(HOST==='PowerPoint'){ let out=null;
     await PowerPoint.run(async ctx=>{ const ss=ctx.presentation.getSelectedShapes(); ss.load('items/id,items/left,items/top,items/width,items/height'); await ctx.sync();
@@ -2180,12 +2183,14 @@ async function selectedPicture(){
         if(o&&o.left!=null){ out.ed.left=o.left; out.ed.top=o.top; out.ed.redo=true;
           // شكل سابق بلا وسم المصدر (تحويل قديم): أقرب شكل Geometry إلى المكان الأصلي يحل محله الشكل الجديد
           const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
+          const other=await otherOwned(ctx,sh,s.id);
           const cx=o.left+s.width/2, cy=o.top+s.height/2; let best=null;
-          sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.hypot(x.left+x.width/2-cx,x.top+x.height/2-cy); if(d<Math.max(s.width,s.height)*.6&&(!best||d<best.d)) best={x,d}; });
+          sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0||other.has(x.id)) return; const d=Math.hypot(x.left+x.width/2-cx,x.top+x.height/2-cy); if(d<Math.max(s.width,s.height)*.6&&(!best||d<best.d)) best={x,d}; });
           if(best) out.ed.near=best.x.id; }
         else { // تحويل قديم بلا موضع محفوظ: الشكل السابق على نفس الارتفاع يدل على المكان
           const sh=ctx.presentation.getSelectedSlides().getItemAt(0).shapes; sh.load('items/id,items/name,items/left,items/top,items/width,items/height'); await ctx.sync();
-          const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
+          const other=await otherOwned(ctx,sh,s.id);
+          const cy=s.top+s.height/2; let best=null; sh.items.forEach(x=>{ if(x.name!==TITLE||x.left<0||other.has(x.id)) return; const d=Math.abs(x.top+x.height/2-cy); if(d<s.height*.6&&(!best||d<best.d)) best={x,d}; });
           if(best){ const x=best.x; out.ed.left=x.left+x.width/2-s.width/2; out.ed.top=x.top+x.height/2-s.height/2; out.ed.redo=true; out.ed.legacy=x.id; } } } });
     return out; }
   let out=null;
