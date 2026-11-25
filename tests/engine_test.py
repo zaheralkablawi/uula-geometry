@@ -103,6 +103,18 @@ async def main():
     check('arc highlighted', len(g['circles'][0].get('arcs',[]))==1)
     await E("()=>{ S.p.circles[0].arcs[0].lab='80°'; S.p.circles[0].arcs[0].show=true; draw(); }")
     check('arc label drawn', await E("PR.some(q=>q.t==='txt'&&(q.s.includes('80')||q.s.includes('٨٠')))"))
+    # 10) تثبيت طول ضلع وقياس زاوية وتثبيت نقطة
+    await setup("S.p=mkFree([[60,200],[260,200],[150,60]],[[0,1],[1,2],[2,0]]); S.p.sides[0].len='5 سم'; S.p.angs[angKey(0,1,2)]={ang:'60°',showAng:true}")
+    r=await E("(()=>{ const G=S.p; const ok1=lockSide(G,0); const ok2=lockAngle(G,angKey(0,1,2)); return [ok1,ok2]; })()")
+    for i,to in ((1,[300,120]),(0,[40,150]),(2,[200,30]),(1,[120,230])):
+      await E("(()=>{ setVertex(%d,%s); })()"%(i,json.dumps(to)))
+    g=await G(); P=g['pts']; import math as m
+    L01=d(P[0],P[1]); a=m.degrees(abs(m.atan2((P[1][0]-P[0][0])*(P[2][1]-P[0][1])-(P[1][1]-P[0][1])*(P[2][0]-P[0][0]),(P[1][0]-P[0][0])*(P[2][0]-P[0][0])+(P[1][1]-P[0][1])*(P[2][1]-P[0][1]))))
+    check('locks created', r==[True,True], r)
+    check('typed length 5 cm fixes side (200)', abs(L01-200)<1e-6, L01)
+    check('typed 60° fixes angle', abs(a-60)<1e-6, a)
+    await E("(()=>{ const G=S.p; G.pin={}; const k=[0,1,2].find(i=>isFreePt(G,i)); G.pin[k]=true; window.__pk=k; window.__pp=G.pts[k].slice(); setVertex(k,[10,10]); })()")
+    check('pinned point does not move', await E("JSON.stringify(S.p.pts[__pk])===JSON.stringify(__pp)"))
     check('no page errors', not errs, errs)
     await b.close()
   print('\n%d failures'%len(FAIL)); sys.exit(1 if FAIL else 0)
